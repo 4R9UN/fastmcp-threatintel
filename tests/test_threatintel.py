@@ -6,14 +6,14 @@ from unittest.mock import Mock, patch
 import httpx
 import pytest
 from src.threatintel.threatintel import (
-    IOC,
     APTAttribution,
+    IOC,
+    cache,
     check_api_keys,
     query_abuseipdb,
     query_otx,
     query_virustotal,
     retry_api_call,
-    cache,
 )
 
 
