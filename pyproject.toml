@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fastmcp-threatintel"
-version = "0.2.0"
+version = "0.2.1"
 description = "AI-Powered Threat Intelligence Analysis Tool with Multi-Source IOC Analysis, APT Attribution, and Interactive Reporting"
 authors = ["Arjun Trivedi <arjun@example.com>"]
 maintainers = ["Arjun Trivedi <arjun@example.com>"]
@@ -111,7 +111,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.2.0"
+version = "0.2.1"
 version_files = [
     "pyproject.toml:version"
 ]
