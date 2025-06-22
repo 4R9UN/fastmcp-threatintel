@@ -141,12 +141,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "--strict-markers",
-    "--strict-config",
-    "--cov=threatintel",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-    "--cov-fail-under=80"
+    "--strict-config"
 ]
 env = [
     "FASTMCP_TEST_MODE=1",

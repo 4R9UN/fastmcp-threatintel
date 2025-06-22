@@ -22,7 +22,7 @@ jobs:
       - name: Run ruff to fix linting errors
         run: ruff --fix .
       - name: Run tests with coverage
-        run: python -m pytest
+        run: python -m pytest --cov=src/threatintel --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
