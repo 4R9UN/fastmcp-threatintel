@@ -5,7 +5,6 @@ from unittest.mock import Mock, patch
 
 import httpx
 import pytest
-
 from src.threatintel.threatintel import (
     APTAttribution,
     IOC,
