@@ -9,7 +9,7 @@ import httpx
 from fastmcp import Context
 from pydantic import BaseModel, Field
 
-from .settings import settings
+from threatintel.settings import settings
 
 # Configure logger
 logger = logging.getLogger("threatintel.api")
@@ -117,25 +117,26 @@ async def retry_api_call(
     """Retry API calls with exponential backoff."""
     retries = max_retries or settings.max_retries
     ctx = kwargs.pop('ctx', None)  # Remove ctx from kwargs before passing to func
+    last_error = None
 
     for attempt in range(retries + 1):
         try:
             return await func(*args, **kwargs)
         except (httpx.HTTPError, TimeoutError) as e:
+            last_error = e
+            
+            # On final attempt, raise the original error
             if attempt == retries:
-                # Last attempt failed, re-raise
-                raise
+                raise last_error
 
-            # Calculate backoff delay with jitter
+            # Calculate backoff delay
             delay = delay_base * (2 ** attempt)
-
             if ctx:
                 await ctx.warning(f"API call failed: {str(e)}. Retrying in {delay:.2f}s...")
-
             await anyio.sleep(delay)
 
-    # Should never reach here due to re-raise in the loop
-    raise RuntimeError("Unexpected error in retry_api_call")
+    # We should never reach here
+    raise RuntimeError("Unexpected: retry loop completed without return or raise")
 
 
 @cached_api_call()
@@ -263,7 +264,14 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             abuseipdb_confidence=None)
 
     except httpx.HTTPStatusError as e:
-        error_message = f"VirusTotal API error: {e.response.status_code} - {e.response.text}"
+        error_message = f"VirusTotal API error ({e.response.status_code}): {e.response.text}"
+        await ctx.error(error_message)
+        return IOC(
+            value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
+            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
+            city=None, region=None, country=None, asn=None, location=None)
+    except httpx.TimeoutException as e:
+        error_message = f"VirusTotal API timeout: {str(e)}"
         await ctx.error(error_message)
         return IOC(
             value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
