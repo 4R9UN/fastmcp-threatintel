@@ -133,7 +133,6 @@ tag_format = "v$version"
 update_changelog_on_bump = true
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 timeout = 30
 testpaths = ["tests"]
 python_files = ["test_*.py", "*_test.py"]
@@ -151,6 +150,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "asyncio: marks tests as asyncio",
 ]
 
 [tool.mypy]
