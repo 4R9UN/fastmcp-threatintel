@@ -13,7 +13,14 @@ from src.threatintel.threatintel import (
     query_otx,
     query_virustotal,
     retry_api_call,
+    cache,
 )
+
+
+@pytest.fixture(autouse=True)
+def clear_cache():
+    """Fixture to clear the cache before each test."""
+    cache.clear()
 
 
 class TestIOCModel:

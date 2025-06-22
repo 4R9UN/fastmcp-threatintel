@@ -1,10 +1,10 @@
-import asyncio
 import logging
 from collections.abc import Callable
 from datetime import datetime, timedelta
 from hashlib import md5
 from typing import Any
 
+import anyio
 import httpx
 from fastmcp import Context
 from pydantic import BaseModel, Field
@@ -121,18 +121,18 @@ async def retry_api_call(
     for attempt in range(retries + 1):
         try:
             return await func(*args, **kwargs)
-        except (httpx.HTTPError, asyncio.TimeoutError) as e:
+        except (httpx.HTTPError, TimeoutError) as e:
             if attempt == retries:
                 # Last attempt failed, re-raise
                 raise
 
             # Calculate backoff delay with jitter
-            delay = delay_base * (2 ** attempt) * (0.75 + 0.5 * asyncio.get_event_loop().time() % 1)
+            delay = delay_base * (2 ** attempt)
 
             if ctx:
                 await ctx.warning(f"API call failed: {str(e)}. Retrying in {delay:.2f}s...")
 
-            await asyncio.sleep(delay)
+            await anyio.sleep(delay)
 
     # Should never reach here due to re-raise in the loop
     raise RuntimeError("Unexpected error in retry_api_call")
