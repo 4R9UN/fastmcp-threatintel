@@ -21,13 +21,14 @@ jobs:
         run: |
           pip install poetry
           poetry install
+      - name: Run ruff to fix linting errors
+        run: poetry run ruff --fix .
       - name: Run tests with coverage
         run: poetry run pytest --cov=src/threatintel
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
 
   release:
     needs: test

@@ -5,7 +5,6 @@ import logging
 import os
 import re
 import tempfile
-import webbrowser
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -502,7 +501,6 @@ async def _analyze_iocs_impl(ioc_string: str | None = None, iocs: list[dict] | N
         if isinstance(result, Exception):
             await ctx.error(f"An API query failed: {str(result)}")
             continue
-        
         # If it's a valid IOC object, group it by its value.
         if isinstance(result, IOC) and result.value in grouped_results:
             grouped_results[result.value].append(result)

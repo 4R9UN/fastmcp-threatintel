@@ -4,7 +4,6 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
-
 from src.threatintel.threatintel import (
     IOC,
     APTAttribution,
@@ -260,9 +259,7 @@ class TestRetryMechanism:
     async def test_retry_success_after_failure(self, mock_context):
         """Test that retry mechanism works correctly."""
         import httpx
-
         from src.threatintel.threatintel import retry_api_call
-
         call_count = 0
 
         async def failing_function():
