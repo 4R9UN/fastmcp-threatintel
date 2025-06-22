@@ -64,7 +64,7 @@ class TestAPTAttributionModel:
 class TestAPIFunctions:
     """Test API query functions."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_check_api_keys_with_all_keys(self, mock_context, monkeypatch):
         """Test API key checking when all keys are present."""
         monkeypatch.setenv("VIRUSTOTAL_API_KEY", "test_key")
@@ -79,7 +79,7 @@ class TestAPIFunctions:
             result = await check_api_keys(mock_context)
             assert result is True
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_check_api_keys_missing_some(self, mock_context, monkeypatch):
         """Test API key checking when some keys are missing."""
         monkeypatch.setenv("VIRUSTOTAL_API_KEY", "test_key")
@@ -94,7 +94,7 @@ class TestAPIFunctions:
             assert result is True  # Should return True if at least one key is available
             mock_context.warning.assert_called()
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_query_virustotal_success(self, mock_context, mock_api_responses):
         """Test successful VirusTotal query."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -116,7 +116,7 @@ class TestAPIFunctions:
                 assert result.type == "ip"
                 assert result.reputation == "Malicious"  # 5 malicious out of 70 total
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_query_virustotal_no_api_key(self, mock_context):
         """Test VirusTotal query without API key."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -128,7 +128,7 @@ class TestAPIFunctions:
             assert result.reputation == "Unknown"
             assert "API key not configured" in result.reports[0]
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_query_otx_success(self, mock_context, mock_api_responses):
         """Test successful OTX query."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -150,7 +150,7 @@ class TestAPIFunctions:
                 assert result.reputation == "Suspicious"  # 3 pulses = suspicious
                 assert len(result.otx_pulses) == 1
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_query_abuseipdb_success(self, mock_context, mock_api_responses):
         """Test successful AbuseIPDB query."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -172,7 +172,7 @@ class TestAPIFunctions:
                 assert result.reputation == "Malicious"  # 85% confidence = malicious
                 assert result.abuseipdb_confidence == 85
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_query_abuseipdb_non_ip(self, mock_context):
         """Test AbuseIPDB query with non-IP IOC."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -188,7 +188,7 @@ class TestAPIFunctions:
 class TestCaching:
     """Test caching functionality."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_cache_hit(self, mock_context):
         """Test that cache returns cached results."""
         from src.threatintel.threatintel import cache, get_cache_key
@@ -209,7 +209,7 @@ class TestCaching:
 class TestErrorHandling:
     """Test error handling in API functions."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_virustotal_http_error(self, mock_context):
         """Test VirusTotal HTTP error handling."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -231,7 +231,7 @@ class TestErrorHandling:
                 assert result.reputation == "Unknown"
                 assert "403" in result.reports[0]
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_network_timeout(self, mock_context):
         """Test network timeout handling."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
@@ -253,7 +253,7 @@ class TestErrorHandling:
 class TestRetryMechanism:
     """Test retry mechanism for API calls."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_retry_success_after_failure(self, mock_context):
         """Test that retry mechanism works correctly."""
         call_count = 0
@@ -273,7 +273,7 @@ class TestRetryMechanism:
             assert result == "success"
             assert call_count == 3  # Should have retried twice before success
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_retry_exhausted(self, mock_context):
         """Test that retry mechanism eventually gives up."""
         async def always_failing_function():
