@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  threatintel:
+    build: .
+    image: fastmcp-threatintel:latest
+    container_name: threatintel-server
+    restart: unless-stopped
+    environment:
+      - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY:-}
+      - OTX_API_KEY=${OTX_API_KEY:-}
+      - ABUSEIPDB_API_KEY=${ABUSEIPDB_API_KEY:-}
+      - IPINFO_API_KEY=${IPINFO_API_KEY:-}
+      - CACHE_TTL=${CACHE_TTL:-3600}
+      - MAX_RETRIES=${MAX_RETRIES:-3}
+      - REQUEST_TIMEOUT=${REQUEST_TIMEOUT:-30}
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "${HOST_PORT:-8000}:8000"
+    volumes:
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+      - threatintel_cache:/app/.cache
+    networks:
+      - threatintel_network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Redis for enhanced caching
+  redis:
+    image: redis:7-alpine
+    container_name: threatintel-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - threatintel_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    container_name: threatintel-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-threatintel}
+      - POSTGRES_USER=${POSTGRES_USER:-threatintel}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - threatintel_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-threatintel}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Grafana for monitoring
+  grafana:
+    image: grafana/grafana:latest
+    container_name: threatintel-grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - threatintel_network
+
+volumes:
+  threatintel_cache:
+    driver: local
+  redis_data:
+    driver: local
+  postgres_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  threatintel_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

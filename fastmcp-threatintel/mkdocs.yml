@@ -1,0 +1,118 @@
+site_name: FastMCP ThreatIntel
+site_description: AI-Powered Threat Intelligence Analysis Tool
+site_author: Arjun Trivedi
+site_url: https://4r9un.github.io/fastmcp-threatintel/
+
+repo_name: 4R9UN/fastmcp-threatintel
+repo_url: https://github.com/4R9UN/fastmcp-threatintel
+edit_uri: edit/main/docs/
+
+copyright: Copyright &copy; 2024 Arjun Trivedi
+
+theme:
+  name: material
+  language: en
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            merge_init_into_class: true
+            show_signature_annotations: true
+  - mermaid2
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - tables
+  - footnotes
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: quickstart.md
+    - Configuration: configuration.md
+  - User Guide:
+    - CLI Usage: cli.md
+    - MCP Integration: mcp.md
+    - API Keys Setup: api-keys.md
+    - Examples: examples.md
+  - Features:
+    - IOC Analysis: features/ioc-analysis.md
+    - APT Attribution: features/apt-attribution.md
+    - Reporting: features/reporting.md
+    - Visualization: features/visualization.md
+  - API Reference:
+    - Core Module: reference/threatintel.md
+    - Tools: reference/tools.md
+    - CLI: reference/cli.md
+    - Visualizations: reference/visualizations.md
+  - Development:
+    - Contributing: development/contributing.md
+    - Testing: development/testing.md
+    - Architecture: development/architecture.md
+  - Deployment:
+    - Docker: deployment/docker.md
+    - Production: deployment/production.md
+    - Scaling: deployment/scaling.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/4R9UN/fastmcp-threatintel
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fastmcp-threatintel/
+  analytics:
+    provider: google
+    property: G-XXXXXXXXXX
+
+extra_css:
+  - stylesheets/extra.css
