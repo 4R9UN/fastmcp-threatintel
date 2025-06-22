@@ -8,16 +8,13 @@ The following credentials need to be configured for this repository:
 
 ### 1. Codecov Integration
 - **Secret Name**: `CODECOV_TOKEN`
-- **Token Value**: `0e06a8a9-3d52-4698-b5f4-6794bdd4ffd0`
-- **Status**: ✅ Pre-configured
+- **Status**: ⚠️ Contact repository owner for token
 
 ### 2. PyPI Publishing
 - **Secret Name**: `PYPI_API_TOKEN`
 - **Status**: ⚠️ Contact repository owner for token
 
 ### 3. Docker Hub Publishing
-- **Secret Name**: `DOCKERHUB_USERNAME`
-- **Value**: `arjuntrivedi`
 - **Secret Name**: `DOCKERHUB_TOKEN`
 - **Status**: ⚠️ Contact repository owner for token
 
@@ -29,19 +26,11 @@ The following credentials need to be configured for this repository:
 gh auth login
 
 # Set pre-configured secrets (get actual tokens from repository owner)
-gh secret set CODECOV_TOKEN --body "0e06a8a9-3d52-4698-b5f4-6794bdd4ffd0"
+gh secret set CODECOV_TOKEN --body "your_codecov_token_here"
 gh secret set PYPI_API_TOKEN --body "your_pypi_token_here"
-gh secret set DOCKERHUB_USERNAME --body "arjuntrivedi"
 gh secret set DOCKERHUB_TOKEN --body "your_docker_token_here"
 
 echo "✅ All secrets configured successfully!"
-```
-
-### Or Run the Setup Script
-```bash
-# Make the script executable and run
-chmod +x scripts/setup-secrets.sh
-./scripts/setup-secrets.sh
 ```
 
 ## 📋 Repository Settings
@@ -102,51 +91,6 @@ gh release create v0.2.1 --title "Release v0.2.1" --generate-notes
 ### Status Badges
 ```markdown
 [![CI/CD Pipeline](https://github.com/4R9UN/fastmcp-threatintel/actions/workflows/ci.yml/badge.svg)](https://github.com/4R9UN/fastmcp-threatintel/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/4R9UN/fastmcp-threatintel/branch/main/graph/badge.svg?token=0e06a8a9-3d52-4698-b5f4-6794bdd4ffd0)](https://codecov.io/gh/4R9UN/fastmcp-threatintel)
+[![codecov](https://codecov.io/gh/4R9UN/fastmcp-threatintel/branch/main/graph/badge.svg?token=your_codecov_token_here)](https://codecov.io/gh/4R9UN/fastmcp-threatintel)
 [![PyPI version](https://badge.fury.io/py/fastmcp-threatintel.svg)](https://badge.fury.io/py/fastmcp-threatintel)
 [![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/fastmcp-threatintel)](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
-```
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-1. **PyPI Upload Fails**
-   - Check if package name `fastmcp-threatintel` is available
-   - Verify API token is correct
-   - Ensure version number is incremented
-
-2. **Docker Build Fails**
-   - Check Dockerfile syntax
-   - Verify base image availability
-   - Ensure Docker Hub credentials are correct
-
-3. **Codecov No Coverage**
-   - Verify token is set correctly
-   - Check that coverage.xml is generated
-   - Ensure pytest-cov is installed
-
-## 📚 Usage Examples
-
-### Install from PyPI
-```bash
-pip install fastmcp-threatintel
-threatintel --help
-```
-
-### Run with Docker
-```bash
-docker run -it arjuntrivedi/fastmcp-threatintel:latest threatintel --version
-```
-
-### Development Setup
-```bash
-git clone https://github.com/4R9UN/fastmcp-threatintel.git
-cd fastmcp-threatintel
-uv sync
-uv run threatintel setup
-```
-
----
-
-**🎉 Codecov token is pre-configured! Contact repository owner for PyPI and Docker tokens.**
