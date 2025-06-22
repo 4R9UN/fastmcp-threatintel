@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           fail_ci_if_error: false
@@ -104,9 +104,9 @@ jobs:
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            pytest-results.xml
-            htmlcov/
-            coverage.xml
+            fastmcp-threatintel/pytest-results.xml
+            fastmcp-threatintel/htmlcov/
+            fastmcp-threatintel/coverage.xml
 
   security:
     name: Security Scan
@@ -141,8 +141,8 @@ jobs:
         with:
           name: security-reports
           path: |
-            bandit-report.json
-            safety-report.json
+            fastmcp-threatintel/bandit-report.json
+            fastmcp-threatintel/safety-report.json
 
   build:
     name: Build Package
@@ -177,7 +177,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: fastmcp-threatintel/dist/
 
   docker-build:
     name: Docker Build & Push
