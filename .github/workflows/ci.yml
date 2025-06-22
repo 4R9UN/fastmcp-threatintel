@@ -30,21 +30,27 @@ jobs:
 
       - name: Create virtual environment
         run: uv venv
+        working-directory: fastmcp-threatintel
 
       - name: Install dependencies
         run: uv sync --dev
+        working-directory: fastmcp-threatintel
 
       - name: Run ruff (linting)
         run: uv run ruff check src/ tests/ --output-format=github
+        working-directory: fastmcp-threatintel
 
       - name: Run ruff (formatting)
         run: uv run ruff format --check src/ tests/
+        working-directory: fastmcp-threatintel
 
       - name: Run mypy (type checking)
         run: uv run mypy src/
+        working-directory: fastmcp-threatintel
 
       - name: Check imports with isort
         run: uv run isort --check-only src/ tests/
+        working-directory: fastmcp-threatintel
 
   test:
     name: Test Suite
@@ -69,9 +75,11 @@ jobs:
 
       - name: Create virtual environment
         run: uv venv
+        working-directory: fastmcp-threatintel
 
       - name: Install dependencies
         run: uv sync --dev
+        working-directory: fastmcp-threatintel
 
       - name: Run tests with coverage
         run: |
@@ -81,12 +89,13 @@ jobs:
             --cov-report=term-missing \
             --cov-report=html \
             --junit-xml=pytest-results.xml
+        working-directory: fastmcp-threatintel
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.10'
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage.xml
+          file: ./fastmcp-threatintel/coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
@@ -99,9 +108,9 @@ jobs:
         with:
           name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
           path: |
-            pytest-results.xml
-            htmlcov/
-            coverage.xml
+            fastmcp-threatintel/pytest-results.xml
+            fastmcp-threatintel/htmlcov/
+            fastmcp-threatintel/coverage.xml
 
   security:
     name: Security Scan
@@ -120,12 +129,15 @@ jobs:
 
       - name: Install dependencies
         run: uv sync --dev
+        working-directory: fastmcp-threatintel
 
       - name: Run bandit security linter
         run: uv run bandit -r src/ -f json -o bandit-report.json || true
+        working-directory: fastmcp-threatintel
 
       - name: Run safety check
         run: uv run safety check --json --output safety-report.json || true
+        working-directory: fastmcp-threatintel
 
       - name: Upload security reports
         uses: actions/upload-artifact@v3
@@ -133,8 +145,8 @@ jobs:
         with:
           name: security-reports
           path: |
-            bandit-report.json
-            safety-report.json
+            fastmcp-threatintel/bandit-report.json
+            fastmcp-threatintel/safety-report.json
 
   build:
     name: Build Package
