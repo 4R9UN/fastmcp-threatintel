@@ -3,6 +3,7 @@
 from datetime import datetime
 from unittest.mock import Mock, patch
 
+import httpx
 import pytest
 from src.threatintel.threatintel import (
     IOC,
@@ -11,6 +12,7 @@ from src.threatintel.threatintel import (
     query_abuseipdb,
     query_otx,
     query_virustotal,
+    retry_api_call,
 )
 
 
@@ -210,8 +212,6 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_virustotal_http_error(self, mock_context):
         """Test VirusTotal HTTP error handling."""
-        import httpx
-
         with patch('src.threatintel.threatintel.settings') as mock_settings:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
@@ -234,8 +234,6 @@ class TestErrorHandling:
     @pytest.mark.asyncio
     async def test_network_timeout(self, mock_context):
         """Test network timeout handling."""
-        import httpx
-
         with patch('src.threatintel.threatintel.settings') as mock_settings:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
@@ -258,8 +256,6 @@ class TestRetryMechanism:
     @pytest.mark.asyncio
     async def test_retry_success_after_failure(self, mock_context):
         """Test that retry mechanism works correctly."""
-        import httpx
-        from src.threatintel.threatintel import retry_api_call
         call_count = 0
 
         async def failing_function():
@@ -280,10 +276,6 @@ class TestRetryMechanism:
     @pytest.mark.asyncio
     async def test_retry_exhausted(self, mock_context):
         """Test that retry mechanism eventually gives up."""
-        import httpx
-
-        from src.threatintel.threatintel import retry_api_call
-
         async def always_failing_function():
             raise httpx.ConnectError("Always fails")
 

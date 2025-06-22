@@ -21,31 +21,31 @@ class IOC(BaseModel):
     """Indicator of Compromise data model."""
     value: str
     type: str  # e.g., "ip", "hash", "domain", "url", "md5", "sha1", "sha256"
-    reputation: str | None = Field(None, description="Overall reputation assessment")
-    score: float | None = Field(None, description="Normalized maliciousness score (0-100)")
-    engines: list[str] = Field(default_factory=list, description="Detection engines that flagged this IOC")
-    reports: list[str] = Field(default_factory=list, description="Reports/comments related to this IOC")
-    otx_pulses: list[str] = Field(default_factory=list, description="OTX pulse names associated with this IOC")
-    abuseipdb_confidence: int | None = Field(None, description="AbuseIPDB confidence score")
-    first_seen: str | None = Field(None, description="First time this IOC was observed")
-    last_seen: str | None = Field(None, description="Last time this IOC was observed")
-    tags: list[str] = Field(default_factory=list, description="Tags associated with this IOC")
-    city: str | None = Field(None, description="City associated with the IP address")
-    region: str | None = Field(None, description="Region associated with the IP address")
-    country: str | None = Field(None, description="Country associated with the IP address")
-    asn: str | None = Field(None, description="ASN associated with the IP address")
-    location: str | None = Field(None, description="Latitude and longitude of the IP address")
+    reputation: str | None = None
+    score: float | None = None
+    engines: list[str] = Field(default_factory=list)
+    reports: list[str] = Field(default_factory=list)
+    otx_pulses: list[str] = Field(default_factory=list)
+    abuseipdb_confidence: int | None = None
+    first_seen: str | None = None
+    last_seen: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    city: str | None = None
+    region: str | None = None
+    country: str | None = None
+    asn: str | None = None
+    location: str | None = None
 
 class APTAttribution(BaseModel):
     """Advanced Persistent Threat attribution data model."""
-    actor: str | None = Field(None, description="APT actor name")
-    group: str | None = Field(None, description="Alternative group name")
-    target_region: str | None = Field(None, description="Primary target region")
-    target_sectors: list[str] = Field(default_factory=list, description="Target sectors (finance, healthcare, etc)")
-    motive: str | None = Field(None, description="Primary motivation (espionage, financial, etc)")
-    summary: str | None = Field(None, description="Brief summary of the actor")
-    mitre_techniques: list[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
-    confidence: int | None = Field(None, description="Attribution confidence (0-100)")
+    actor: str | None = None
+    group: str | None = None
+    target_region: str | None = None
+    target_sectors: list[str] = Field(default_factory=list)
+    motive: str | None = None
+    summary: str | None = None
+    mitre_techniques: list[str] = Field(default_factory=list)
+    confidence: int | None = None
 
 
 async def check_api_keys(ctx: Context) -> bool:
