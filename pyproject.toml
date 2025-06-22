@@ -24,7 +24,6 @@ exclude = [
 homepage = "https://github.com/4R9UN/fastmcp-threatintel"
 repository = "https://github.com/4R9UN/fastmcp-threatintel"
 documentation = "https://4r9un.github.io/fastmcp-threatintel/"
-changelog = "https://github.com/4R9UN/fastmcp-threatintel/blob/main/CHANGELOG.md"
 keywords = [
     "threat-intelligence",
     "cybersecurity",
