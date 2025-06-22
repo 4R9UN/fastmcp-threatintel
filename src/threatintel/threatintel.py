@@ -117,11 +117,13 @@ async def retry_api_call(
     """Retry API calls with exponential backoff."""
     retries = max_retries or settings.max_retries
     ctx = kwargs.pop('ctx', None)  # Remove ctx from kwargs before passing to func
+    last_exception = None
 
     for attempt in range(retries + 1):
         try:
             return await func(*args, **kwargs)
-        except (httpx.HTTPError, TimeoutError) as e:
+        except Exception as e:
+            last_exception = e
             # On final attempt, raise the original error
             if attempt == retries:
                 raise e from None
@@ -132,7 +134,9 @@ async def retry_api_call(
                 await ctx.warning(f"API call failed: {str(e)}. Retrying in {delay:.2f}s...")
             await anyio.sleep(delay)
 
-    # We should never reach here
+    # Should never reach here, but if we do, raise the last exception
+    if last_exception:
+        raise last_exception from None
     raise RuntimeError("Unexpected: retry loop completed without return or raise")
 
 
