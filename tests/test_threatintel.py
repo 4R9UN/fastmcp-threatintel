@@ -101,6 +101,7 @@ class TestAPIFunctions:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
+            mock_settings.cache_ttl = 300
 
             with patch('httpx.AsyncClient') as mock_client:
                 mock_response = Mock()
@@ -121,6 +122,7 @@ class TestAPIFunctions:
         """Test VirusTotal query without API key."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
             mock_settings.virustotal_api_key = None
+            mock_settings.cache_ttl = 300
 
             result = await query_virustotal("192.168.1.1", "ip", ctx=mock_context)
 
@@ -135,6 +137,7 @@ class TestAPIFunctions:
             mock_settings.otx_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
+            mock_settings.cache_ttl = 300
 
             with patch('httpx.AsyncClient') as mock_client:
                 mock_response = Mock()
@@ -157,6 +160,7 @@ class TestAPIFunctions:
             mock_settings.abuseipdb_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
+            mock_settings.cache_ttl = 300
 
             with patch('httpx.AsyncClient') as mock_client:
                 mock_response = Mock()
@@ -177,6 +181,7 @@ class TestAPIFunctions:
         """Test AbuseIPDB query with non-IP IOC."""
         with patch('src.threatintel.threatintel.settings') as mock_settings:
             mock_settings.abuseipdb_api_key = "test_key"
+            mock_settings.cache_ttl = 300
 
             result = await query_abuseipdb("example.com", "domain", ctx=mock_context)
 
@@ -216,6 +221,7 @@ class TestErrorHandling:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
+            mock_settings.cache_ttl = 300
 
             with patch('httpx.AsyncClient') as mock_client:
                 mock_response = Mock()
@@ -238,6 +244,7 @@ class TestErrorHandling:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
+            mock_settings.cache_ttl = 300
 
             with patch('httpx.AsyncClient') as mock_client:
                 mock_client.return_value.__aenter__.return_value.get.side_effect = \
