@@ -9,7 +9,7 @@ import httpx
 from fastmcp import Context
 from pydantic import BaseModel, Field
 
-from threatintel.settings import settings
+from .settings import settings
 
 # Configure logger
 logger = logging.getLogger("threatintel.api")
@@ -117,17 +117,14 @@ async def retry_api_call(
     """Retry API calls with exponential backoff."""
     retries = max_retries or settings.max_retries
     ctx = kwargs.pop('ctx', None)  # Remove ctx from kwargs before passing to func
-    last_error = None
 
     for attempt in range(retries + 1):
         try:
             return await func(*args, **kwargs)
         except (httpx.HTTPError, TimeoutError) as e:
-            last_error = e
-            
             # On final attempt, raise the original error
             if attempt == retries:
-                raise last_error
+                raise e from None
 
             # Calculate backoff delay
             delay = delay_base * (2 ** attempt)
@@ -245,7 +242,7 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             f"VirusTotal: {malicious_count} malicious, {suspicious_count} suspicious "
             f"out of {total_engines} engines"
         )
-          # Create and return the IOC object
+        # Create and return the IOC object
         return IOC(
             value=ioc,
             type=ioc_type,
@@ -365,7 +362,7 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             if dates:
                 first_seen = min(dates)
                 last_seen = max(dates)
-          # Extract tags from pulses
+        # Extract tags from pulses
         all_tags = set()
         for pulse in pulse_info.get("pulses", []):
             tags = pulse.get("tags", [])
@@ -491,7 +488,7 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
 
         # Get any report comments as additional context
         reports = [f"AbuseIPDB: {confidence}% confidence score, {total_reports} report(s)"]
-          # Extract tags from usage type
+        # Extract tags from usage type
         tags = []
         if data.get("usageType"):
             tags.append(data.get("usageType"))
