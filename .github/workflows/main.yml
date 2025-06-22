@@ -22,6 +22,9 @@ jobs:
       - name: Run ruff to fix linting errors
         run: ruff --fix .
       - name: Run tests with coverage
+        env:
+          FASTMCP_TEST_MODE: "1"
+          FASTMCP_LOG_LEVEL: "DEBUG"
         run: python -m pytest --cov=src/threatintel --cov-report=xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
