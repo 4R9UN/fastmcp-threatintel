@@ -24,7 +24,6 @@ exclude = [
 homepage = "https://github.com/4R9UN/fastmcp-threatintel"
 repository = "https://github.com/4R9UN/fastmcp-threatintel"
 documentation = "https://4r9un.github.io/fastmcp-threatintel/"
-changelog = "https://github.com/4R9UN/fastmcp-threatintel/blob/main/CHANGELOG.md"
 keywords = [
     "threat-intelligence",
     "cybersecurity",
@@ -69,6 +68,33 @@ classifiers = [
 [tool.poetry.scripts]
 threatintel = "threatintel.cli:app"
 
+[project]
+name = "fastmcp-threatintel"
+version = "0.2.1"
+description = "AI-Powered Threat Intelligence Analysis Tool with Multi-Source IOC Analysis, APT Attribution, and Interactive Reporting"
+authors = [
+    {name = "Arjun Trivedi", email = "arjun@example.com"},
+]
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=0.1.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.0.0",
+    "pandas>=2.0.0",
+    "networkx>=3.0",
+    "python-dotenv>=1.1.0",
+    "anyio>=4.6.0",
+    "typer>=0.12.5",
+    "tabulate>=0.9.0",
+    "tqdm>=4.66.1",
+    "rich>=13.0.0",
+    "plotly>=5.0.0",
+    "kaleido>=0.2.1",
+]
+
+[project.scripts]
+threatintel = "threatintel.cli:app"
+
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 fastmcp = ">=0.1.0"
@@ -108,6 +134,12 @@ faker = ">=20.0.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.0.0",
+]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
