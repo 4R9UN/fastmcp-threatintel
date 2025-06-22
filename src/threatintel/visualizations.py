@@ -1,42 +1,42 @@
 """Visualization and reporting utilities for threat intelligence data."""
 
 import json
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any
 
 from .threatintel import IOC, APTAttribution
 
 
-def create_ioc_table(iocs: List[IOC]) -> str:
+def create_ioc_table(iocs: list[IOC]) -> str:
     """Create a markdown table from IOC results."""
     if not iocs:
         return "No IOCs to display."
-    
+
     # Create markdown table
     table_lines = [
         "| IOC | Type | Reputation | Score | Reports |",
         "|-----|------|------------|-------|---------|"
     ]
-    
+
     for ioc in iocs:
         reputation = ioc.reputation or "Unknown"
         score = f"{ioc.score:.1f}" if ioc.score is not None else "N/A"
         reports_summary = "; ".join(ioc.reports[:2]) if ioc.reports else "No reports"
-        
+
         # Truncate long values
         value = ioc.value[:50] + "..." if len(ioc.value) > 50 else ioc.value
         reports_summary = reports_summary[:100] + "..." if len(reports_summary) > 100 else reports_summary
-        
+
         table_lines.append(f"| {value} | {ioc.type.upper()} | {reputation} | {score} | {reports_summary} |")
-    
+
     return "\n".join(table_lines)
 
 
-def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] = None) -> Dict[str, Any]:
+def create_network_graph(iocs: list[IOC], attribution: APTAttribution | None = None) -> dict[str, Any]:
     """Create a D3.js compatible network graph of IOCs and their relationships."""
     nodes = []
     links = []
-    
+
     # Add IOC nodes
     for i, ioc in enumerate(iocs):
         color = "#ff4444" if ioc.reputation == "Malicious" else "#ffaa44" if ioc.reputation == "Suspicious" else "#44aa44"
@@ -50,7 +50,7 @@ def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] 
             "color": color,
             "size": max(10, (ioc.score or 0) / 5) if ioc.score else 10
         })
-    
+
     # Add attribution node if available
     if attribution and attribution.actor and attribution.actor != "Unknown":
         nodes.append({
@@ -61,7 +61,7 @@ def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] 
             "color": "#aa44aa",
             "size": 20
         })
-        
+
         # Link IOCs to APT actor
         for i in range(len(iocs)):
             links.append({
@@ -70,7 +70,7 @@ def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] 
                 "type": "attributed_to",
                 "strength": attribution.confidence / 100 if attribution.confidence else 0.5
             })
-    
+
     # Add geolocation nodes for IP addresses
     countries = {}
     for i, ioc in enumerate(iocs):
@@ -86,14 +86,14 @@ def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] 
                     "size": 15
                 }
                 nodes.append(countries[country_id])
-            
+
             links.append({
                 "source": f"ioc_{i}",
                 "target": country_id,
                 "type": "located_in",
                 "strength": 0.3
             })
-    
+
     return {
         "nodes": nodes,
         "links": links,
@@ -106,22 +106,22 @@ def create_network_graph(iocs: List[IOC], attribution: Optional[APTAttribution] 
 
 
 def create_interactive_report(
-    iocs: List[IOC], 
-    attribution: Optional[APTAttribution] = None, 
+    iocs: list[IOC],
+    attribution: APTAttribution | None = None,
     report_id: str = "report",
     include_graph: bool = True
 ) -> str:
     """Create an interactive HTML report with visualizations."""
-    
+
     # Calculate summary statistics
     total_iocs = len(iocs)
     malicious_count = sum(1 for ioc in iocs if ioc.reputation == "Malicious")
     suspicious_count = sum(1 for ioc in iocs if ioc.reputation == "Suspicious")
     clean_count = sum(1 for ioc in iocs if ioc.reputation == "Clean")
-    
+
     # Generate network graph data
     graph_data = create_network_graph(iocs, attribution) if include_graph else None
-    
+
     # Create HTML report
     html_content = f"""
 <!DOCTYPE html>
@@ -184,7 +184,7 @@ def create_interactive_report(
         .suspicious {{ color: #ffc107; }}
         .clean {{ color: #28a745; }}
         .total {{ color: #6c757d; }}
-        
+
         .content {{
             padding: 30px;
         }}
@@ -197,7 +197,7 @@ def create_interactive_report(
             padding-bottom: 10px;
             margin-bottom: 20px;
         }}
-        
+
         .ioc-table {{
             width: 100%;
             border-collapse: collapse;
@@ -217,7 +217,7 @@ def create_interactive_report(
         .ioc-table tr:hover {{
             background-color: #f5f5f5;
         }}
-        
+
         .reputation-badge {{
             padding: 4px 8px;
             border-radius: 4px;
@@ -240,7 +240,7 @@ def create_interactive_report(
             background-color: #6c757d;
             color: white;
         }}
-        
+
         #network-graph {{
             width: 100%;
             height: 500px;
@@ -248,7 +248,7 @@ def create_interactive_report(
             border-radius: 8px;
             background: #fafafa;
         }}
-        
+
         .attribution-card {{
             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             color: white;
@@ -281,7 +281,7 @@ def create_interactive_report(
             <h1>🛡️ ThreatIntel Analysis Report</h1>
             <p>Report ID: {report_id} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
-        
+
         <div class="summary">
             <div class="stat-card">
                 <div class="stat-number total">{total_iocs}</div>
@@ -300,7 +300,7 @@ def create_interactive_report(
                 <div>Clean</div>
             </div>
         </div>
-        
+
         <div class="content">
 """
 
@@ -350,7 +350,7 @@ def create_interactive_report(
         score_text = f"{ioc.score:.1f}" if ioc.score is not None else "N/A"
         location = f"{ioc.city}, {ioc.country}" if ioc.city and ioc.country else (ioc.country or "Unknown")
         reports_summary = "; ".join(ioc.reports[:2]) if ioc.reports else "No reports"
-        
+
         html_content += f"""
                         <tr>
                             <td><code>{ioc.value}</code></td>
@@ -375,24 +375,24 @@ def create_interactive_report(
                 <h2>🔗 Network Visualization</h2>
                 <div id="network-graph"></div>
             </div>
-            
+
             <script>
                 // Network graph visualization
                 const graphData = {json.dumps(graph_data)};
-                
+
                 const width = document.getElementById('network-graph').clientWidth;
                 const height = 500;
-                
+
                 const svg = d3.select("#network-graph")
                     .append("svg")
                     .attr("width", width)
                     .attr("height", height);
-                
+
                 const simulation = d3.forceSimulation(graphData.nodes)
                     .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(100))
                     .force("charge", d3.forceManyBody().strength(-300))
                     .force("center", d3.forceCenter(width / 2, height / 2));
-                
+
                 const link = svg.append("g")
                     .selectAll("line")
                     .data(graphData.links)
@@ -400,7 +400,7 @@ def create_interactive_report(
                     .attr("stroke", "#999")
                     .attr("stroke-opacity", 0.6)
                     .attr("stroke-width", 2);
-                
+
                 const node = svg.append("g")
                     .selectAll("circle")
                     .data(graphData.nodes)
@@ -413,7 +413,7 @@ def create_interactive_report(
                         .on("start", dragstarted)
                         .on("drag", dragged)
                         .on("end", dragended));
-                
+
                 const label = svg.append("g")
                     .selectAll("text")
                     .data(graphData.nodes)
@@ -422,37 +422,37 @@ def create_interactive_report(
                     .attr("font-size", "10px")
                     .attr("text-anchor", "middle")
                     .attr("dy", 3);
-                
+
                 node.append("title")
                     .text(d => `${{d.label}} (${{d.type}}) - ${{d.reputation || 'Unknown'}}`);
-                
+
                 simulation.on("tick", () => {{
                     link
                         .attr("x1", d => d.source.x)
                         .attr("y1", d => d.source.y)
                         .attr("x2", d => d.target.x)
                         .attr("y2", d => d.target.y);
-                    
+
                     node
                         .attr("cx", d => d.x)
                         .attr("cy", d => d.y);
-                    
+
                     label
                         .attr("x", d => d.x)
                         .attr("y", d => d.y);
                 }});
-                
+
                 function dragstarted(event, d) {{
                     if (!event.active) simulation.alphaTarget(0.3).restart();
                     d.fx = d.x;
                     d.fy = d.y;
                 }}
-                
+
                 function dragged(event, d) {{
                     d.fx = event.x;
                     d.fy = event.y;
                 }}
-                
+
                 function dragended(event, d) {{
                     if (!event.active) simulation.alphaTarget(0);
                     d.fx = null;

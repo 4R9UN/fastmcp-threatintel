@@ -91,54 +91,75 @@ threatintel analyze malware.exe --verbose
 
 ## 📋 Installation Options
 
-=== "🔥 UV (Modern & Fast)"
-    ```bash
-    # Install UV if not already installed
-    curl -LsSf https://astral.sh/uv/install.sh | sh
-    
-    # Clone and setup
-    git clone https://github.com/4R9UN/fastmcp-threatintel.git
-    cd fastmcp-threatintel
-    uv sync
-    
-    # Quick test
-    uv run threatintel --version
-    ```
+Choose the method that best fits your workflow, from a simple `pip` install to a full development setup.
 
-=== "📦 Poetry"
-    ```bash
-    # Install Poetry if not already installed
-    curl -sSL https://install.python-poetry.org | python3 -
-    
-    # Clone and setup
-    git clone https://github.com/4R9UN/fastmcp-threatintel.git
-    cd fastmcp-threatintel
-    poetry install
-    
-    # Activate environment
-    poetry shell
-    ```
+### 🐳 Docker (Easiest)
 
-=== "🐳 Docker"
-    ```bash
-    # Development mode with volume mount
-    docker run -it --rm \
-      -v $(pwd)/.env:/app/.env \
-      -v $(pwd)/reports:/app/reports \
-      arjuntrivedi/fastmcp-threatintel:latest
-    
-    # Production deployment
-    docker-compose up -d
-    ```
+For a hassle-free setup, run the tool inside a Docker container. This is perfect for quick deployment or isolated execution.
 
-=== "🐍 pip"
-    ```bash
-    # Install from PyPI
-    pip install fastmcp-threatintel
-    
-    # Or install development version
-    pip install git+https://github.com/4R9UN/fastmcp-threatintel.git
-    ```
+```bash
+# Pull the latest image from Docker Hub
+docker pull arjuntrivedi/fastmcp-threatintel:latest
+
+# Run the server, passing your API keys as environment variables
+docker run -it --rm \
+  -e VIRUSTOTAL_API_KEY="your_key" \
+  -e OTX_API_KEY="your_key" \
+  -p 8000:8000 \
+  arjuntrivedi/fastmcp-threatintel:latest server
+```
+> **Tip**: For production, use the provided `docker-compose.yml` for managed deployments.
+
+### 🐍 pip (Standard)
+
+Install directly from PyPI into your active Python environment. Ideal for using it as a command-line tool.
+
+```bash
+# Install the latest stable version
+pip install fastmcp-threatintel
+
+# After installation, run the setup wizard
+threatintel setup
+```
+For the latest development version:
+```bash
+pip install git+https://github.com/4R9UN/fastmcp-threatintel.git
+```
+
+### 🔥 UV (Developer - Recommended)
+
+Use **UV** for a lightning-fast development setup. This is the recommended method for contributors.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/4R9UN/fastmcp-threatintel.git
+cd fastmcp-threatintel
+
+# 2. Install dependencies using UV
+# (Install uv first if you don't have it: curl -LsSf https://astral.sh/uv/install.sh | sh)
+uv sync --dev
+
+# 3. Run the application
+uv run threatintel --version
+```
+
+### 📦 Poetry (Developer)
+
+Use **Poetry** for robust dependency management if it's already part of your workflow.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/4R9UN/fastmcp-threatintel.git
+cd fastmcp-threatintel
+
+# 2. Install dependencies using Poetry
+# (Install poetry first if you don't have it: curl -sSL https://install.python-poetry.org | python3 -)
+poetry install
+
+# 3. Activate the virtual environment and run
+poetry shell
+threatintel --version
+```
 
 ## 🔧 Configuration
 
@@ -187,39 +208,133 @@ threatintel interactive
 threatintel server --host 0.0.0.0 --port 8000
 ```
 
-### MCP Integration
+## 🔌 MCP Integration
 
-#### Claude Desktop
-Add to your Claude Desktop config:
-```json
-{
-  "mcpServers": {
-    "threatintel": {
-      "command": "uv",
-      "args": ["run", "src/threatintel/server.py"],
-      "cwd": "/path/to/fastmcp-threatintel",
-      "env": {
-        "VIRUSTOTAL_API_KEY": "your_key",
-        "OTX_API_KEY": "your_key"
+Integrate `fastmcp-threatintel` with your favorite AI assistant that supports the Model Context Protocol (MCP), such as the Claude Desktop app or VSCode with the Roo-Cline extension.
+
+The MCP server allows your AI assistant to directly call the tools available in this package (e.g., `analyze_iocs`).
+
+### How it Works
+You configure your MCP client (VSCode/Claude) to launch the `threatintel` server. The client will manage the server's lifecycle, starting it when needed. The server then exposes its tools to the AI.
+
+### Configuration Steps
+
+#### 🖥️ VSCode with Roo-Cline
+
+1.  **Install the Extension**: Make sure you have the [Roo-Cline](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) extension installed in VSCode.
+2.  **Open MCP Settings**:
+    *   Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`).
+    *   Type `Roo: Open MCP Settings` and press Enter.
+    *   This will open your `mcp_settings.json` file.
+3.  **Add Server Configuration**: Add the following JSON object to the `mcpServers` dictionary. This example uses **UV**.
+
+    ```json
+    {
+      "mcpServers": {
+        "threatintel": {
+          "command": "uv",
+          "args": ["run", "threatintel", "server", "--port", "8001"],
+          "cwd": "/path/to/your/fastmcp-threatintel/project",
+          "env": {
+            // API keys are automatically loaded from the .env file
+            // in the specified 'cwd'. You can override them here if needed.
+            // "VIRUSTOTAL_API_KEY": "your_key_here"
+          }
+        }
       }
     }
-  }
-}
-```
+    ```
 
-#### VSCode with Cline
-Configure in MCP settings:
-```json
-{
-  "mcpServers": {
-    "threatintel": {
-      "command": "poetry",
-      "args": ["run", "python", "src/threatintel/server.py"],
-      "cwd": "C:\\path\\to\\fastmcp-threatintel"
+    **Configuration Notes:**
+    *   **`cwd`**: **Crucially**, replace `/path/to/your/fastmcp-threatintel/project` with the **absolute path** to where you cloned this repository.
+    *   **`command` & `args`**:
+        *   If you use **Poetry**, change `command` to `"poetry"` and `args` to `["run", "threatintel", "server", "--port", "8001"]`.
+        *   If you installed with **pip** into a virtual environment, you'll need to point to the python executable in that venv.
+    *   **`port`**: It's recommended to use a different port (e.g., `8001`) for the client-managed server to avoid conflicts if you run it manually.
+    *   **`env`**: API keys are loaded from the `.env` file in your project directory (`cwd`). You only need to set them here to override the `.env` file.
+
+#### 🐍 Using a Python Virtual Environment (`venv`)
+
+If you are not using a package manager like UV or Poetry, you can configure the MCP server to use a standard Python virtual environment.
+
+1.  **Create & Activate Venv**: From the project root, create and activate a virtual environment.
+    ```bash
+    # Create the venv
+    python -m venv .venv
+
+    # Activate it
+    # Windows
+    .venv\Scripts\activate
+    # macOS / Linux
+    source .venv/bin/activate
+    ```
+2.  **Install the Package**: Install the package in editable mode so your changes are reflected.
+    ```bash
+    pip install -e .
+    ```
+3.  **Configure MCP Settings**: In your `mcp_settings.json`, you must provide the **absolute path** to the Python executable inside your `.venv`.
+
+    ```json
+    {
+      "mcpServers": {
+        "threatintel": {
+          // Use the absolute path to the python executable in your venv
+          "command": "/path/to/your/fastmcp-threatintel/project/.venv/bin/python", // macOS/Linux example
+          // "command": "C:\\path\\to\\your\\fastmcp-threatintel\\project\\.venv\\Scripts\\python.exe", // Windows example
+          "args": [
+            "-m",
+            "threatintel.cli",
+            "server",
+            "--port",
+            "8001"
+          ],
+          "cwd": "/path/to/your/fastmcp-threatintel/project"
+        }
+      }
     }
-  }
-}
-```
+    ```
+    **Key Points:**
+    *   Replace `/path/to/your/fastmcp-threatintel/project` with the correct absolute path on your machine.
+    *   The `command` must point directly to the `python` or `python.exe` file within the virtual environment.
+    *   Using `"-m", "threatintel.cli"` tells Python to run the `cli` module, which is the most reliable way to launch the server from a venv.
+
+#### 🤖 Claude Desktop App
+
+The process is similar for the Claude Desktop application.
+
+1.  **Locate Configuration**: Find the MCP configuration file for the Claude Desktop application. This is typically located in the application's settings or preferences directory.
+2.  **Add Server Configuration**: Add a similar configuration to the `mcpServers` section.
+
+    ```json
+    {
+      "mcpServers": {
+        "threatintel": {
+          "command": "uv",
+          "args": ["run", "threatintel", "server"],
+          "cwd": "/path/to/your/fastmcp-threatintel/project"
+        }
+      }
+    }
+    ```
+    **Note**: Ensure the `cwd` path is correct for your system.
+
+### ✅ Verify the Integration
+
+After configuring, you can test it in your AI assistant:
+
+1.  Open a new chat.
+2.  Type `@threatintel` to see if the tool is recognized.
+3.  Send a prompt to invoke a tool:
+
+    ```
+    @threatintel(analyze_iocs, ioc_string='8.8.8.8')
+    ```
+
+    Or use a natural language prompt:
+
+    ```
+    @threatintel Can you analyze the IP address 8.8.8.8 and give me a full report?
+    ```
 
 ### Python API
 

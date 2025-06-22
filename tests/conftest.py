@@ -1,10 +1,12 @@
 """Pytest configuration and fixtures for test suite."""
 
-import os
-import pytest
 import asyncio
-from typing import Generator, Dict, Any
-from unittest.mock import Mock, AsyncMock
+import os
+from collections.abc import Generator
+from typing import Any
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 # Set test environment variables
 os.environ["FASTMCP_TEST_MODE"] = "1"
@@ -28,7 +30,7 @@ def mock_context():
     return context
 
 @pytest.fixture
-def sample_ioc_data() -> Dict[str, Any]:
+def sample_ioc_data() -> dict[str, Any]:
     """Sample IOC data for testing."""
     return {
         "ip": "192.168.1.1",

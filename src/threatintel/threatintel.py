@@ -1,11 +1,13 @@
-import httpx
-import logging
 import asyncio
-from hashlib import md5
+import logging
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Any, Tuple, Callable
+from hashlib import md5
+from typing import Any
+
+import httpx
 from fastmcp import Context
+from pydantic import BaseModel, Field
 
 from .settings import settings
 
@@ -13,37 +15,37 @@ from .settings import settings
 logger = logging.getLogger("threatintel.api")
 
 # Cache for API responses
-cache: Dict[str, Tuple[Any, datetime]] = {}
+cache: dict[str, tuple[Any, datetime]] = {}
 
 class IOC(BaseModel):
     """Indicator of Compromise data model."""
     value: str
     type: str  # e.g., "ip", "hash", "domain", "url", "md5", "sha1", "sha256"
-    reputation: Optional[str] = Field(None, description="Overall reputation assessment")
-    score: Optional[float] = Field(None, description="Normalized maliciousness score (0-100)")
-    engines: List[str] = Field(default_factory=list, description="Detection engines that flagged this IOC")
-    reports: List[str] = Field(default_factory=list, description="Reports/comments related to this IOC")
-    otx_pulses: List[str] = Field(default_factory=list, description="OTX pulse names associated with this IOC")
-    abuseipdb_confidence: Optional[int] = Field(None, description="AbuseIPDB confidence score")
-    first_seen: Optional[str] = Field(None, description="First time this IOC was observed")
-    last_seen: Optional[str] = Field(None, description="Last time this IOC was observed")
-    tags: List[str] = Field(default_factory=list, description="Tags associated with this IOC")
-    city: Optional[str] = Field(None, description="City associated with the IP address")
-    region: Optional[str] = Field(None, description="Region associated with the IP address")
-    country: Optional[str] = Field(None, description="Country associated with the IP address")
-    asn: Optional[str] = Field(None, description="ASN associated with the IP address")
-    location: Optional[str] = Field(None, description="Latitude and longitude of the IP address")
+    reputation: str | None = Field(None, description="Overall reputation assessment")
+    score: float | None = Field(None, description="Normalized maliciousness score (0-100)")
+    engines: list[str] = Field(default_factory=list, description="Detection engines that flagged this IOC")
+    reports: list[str] = Field(default_factory=list, description="Reports/comments related to this IOC")
+    otx_pulses: list[str] = Field(default_factory=list, description="OTX pulse names associated with this IOC")
+    abuseipdb_confidence: int | None = Field(None, description="AbuseIPDB confidence score")
+    first_seen: str | None = Field(None, description="First time this IOC was observed")
+    last_seen: str | None = Field(None, description="Last time this IOC was observed")
+    tags: list[str] = Field(default_factory=list, description="Tags associated with this IOC")
+    city: str | None = Field(None, description="City associated with the IP address")
+    region: str | None = Field(None, description="Region associated with the IP address")
+    country: str | None = Field(None, description="Country associated with the IP address")
+    asn: str | None = Field(None, description="ASN associated with the IP address")
+    location: str | None = Field(None, description="Latitude and longitude of the IP address")
 
 class APTAttribution(BaseModel):
     """Advanced Persistent Threat attribution data model."""
-    actor: Optional[str] = Field(None, description="APT actor name")
-    group: Optional[str] = Field(None, description="Alternative group name")
-    target_region: Optional[str] = Field(None, description="Primary target region")
-    target_sectors: List[str] = Field(default_factory=list, description="Target sectors (finance, healthcare, etc)")
-    motive: Optional[str] = Field(None, description="Primary motivation (espionage, financial, etc)")
-    summary: Optional[str] = Field(None, description="Brief summary of the actor")
-    mitre_techniques: List[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
-    confidence: Optional[int] = Field(None, description="Attribution confidence (0-100)")
+    actor: str | None = Field(None, description="APT actor name")
+    group: str | None = Field(None, description="Alternative group name")
+    target_region: str | None = Field(None, description="Primary target region")
+    target_sectors: list[str] = Field(default_factory=list, description="Target sectors (finance, healthcare, etc)")
+    motive: str | None = Field(None, description="Primary motivation (espionage, financial, etc)")
+    summary: str | None = Field(None, description="Brief summary of the actor")
+    mitre_techniques: list[str] = Field(default_factory=list, description="MITRE ATT&CK technique IDs")
+    confidence: int | None = Field(None, description="Attribution confidence (0-100)")
 
 
 async def check_api_keys(ctx: Context) -> bool:
@@ -72,7 +74,7 @@ def get_cache_key(func_name: str, *args) -> str:
     return md5(":".join(key_parts).encode()).hexdigest()
 
 
-def cached_api_call(ttl_seconds: Optional[int] = None):
+def cached_api_call(ttl_seconds: int | None = None):
     """Decorator for caching API call results."""
     def decorator(func: Callable) -> Callable:
         async def wrapper(*args, **kwargs) -> Any:
@@ -83,7 +85,7 @@ def cached_api_call(ttl_seconds: Optional[int] = None):
             ttl = ttl_seconds or settings.cache_ttl
 
             # Generate cache key (exclude ctx from cache key)
-            cache_args = [arg for arg in args]
+            cache_args = list(args)
             cache_key = get_cache_key(func.__name__, *cache_args)
 
             # Check if result in cache and not expired
@@ -106,9 +108,9 @@ def cached_api_call(ttl_seconds: Optional[int] = None):
 
 
 async def retry_api_call(
-    func: Callable, 
-    *args, 
-    max_retries: Optional[int] = None, 
+    func: Callable,
+    *args,
+    max_retries: int | None = None,
     delay_base: float = 1.0,
     **kwargs
 ) -> Any:
@@ -291,7 +293,7 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     ioc_type_map = {
         "ip": "IPv4",
         "domain": "domain",
-        "url": "url", 
+        "url": "url",
         "md5": "file",
         "sha1": "file",
         "sha256": "file",
@@ -412,21 +414,21 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     if not settings.abuseipdb_api_key:
         await ctx.warning("AbuseIPDB API key not configured")
         return IOC(
-           value=ioc, 
-           type=ioc_type, 
+           value=ioc,
+           type=ioc_type,
            reputation="Unknown",
            reports=["AbuseIPDB: API key not configured"],
            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
            city=None, region=None, country=None, asn=None, location=None
         )
-        
+
     # AbuseIPDB only supports IP addresses
     normalized_type = ioc_type.lower()
     if normalized_type != "ip":
         await ctx.debug(f"AbuseIPDB only supports IP addresses, not {ioc_type}")
         return IOC(
-           value=ioc, 
-           type=ioc_type, 
+           value=ioc,
+           type=ioc_type,
            reputation="Unknown",
            reports=["AbuseIPDB: Only supports IP addresses"],
            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
@@ -511,9 +513,9 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
         error_message = f"AbuseIPDB API error: {e.response.status_code} - {e.response.text}"
         await ctx.error(error_message)
         return IOC(
-            value=ioc, 
-            type=ioc_type, 
-            reputation="Unknown", 
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
             reports=[error_message],
             score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
             city=None, region=None, country=None, asn=None, location=None
@@ -522,9 +524,9 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
         error_message = f"AbuseIPDB API error: {str(e)}"
         await ctx.error(error_message)
         return IOC(
-            value=ioc, 
-            type=ioc_type, 
-            reputation="Unknown", 
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
             reports=[error_message],
             score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
             city=None, region=None, country=None, asn=None, location=None

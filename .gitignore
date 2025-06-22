@@ -100,3 +100,9 @@ config.yaml
 secrets.yaml
 api_keys.txt
 test_results/
+# Secrets
+.env*
+!/.env.example
+
+# Docker
+docker-compose.override.yml
