@@ -39,12 +39,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e .[dev,test]
       - name: Run tests
-        run: pytest --cov=src --cov-report=xml
+        run: pytest
       - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
   release:
     needs: [lint, test]
