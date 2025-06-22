@@ -22,7 +22,7 @@ jobs:
       - name: Run ruff to fix linting errors
         run: ruff --fix .
       - name: Run tests with coverage
-        run: pytest
+        run: python -m pytest
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
@@ -38,14 +38,13 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: '3.10'
-      - name: Install dependencies
-        run: |
-          pip install poetry
-          poetry install
+      - name: Install Hatch
+        run: pip install hatch
       - name: Build and publish to PyPI
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_API_TOKEN }}
-        run: poetry publish --build
+          HATCH_INDEX_USER: __token__
+          HATCH_INDEX_AUTH: ${{ secrets.PYPI_API_TOKEN }}
+        run: hatch publish
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -56,4 +55,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: 4r9un/fastmcp-threatintel:latest
+          tags: |
+            4r9un/fastmcp-threatintel:latest
+            4r9un/fastmcp-threatintel:${{ github.ref_name }}
