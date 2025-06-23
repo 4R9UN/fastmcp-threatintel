@@ -21,12 +21,12 @@ RUN pip install uv
 WORKDIR /app
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml ./
 
 # Create virtual environment and install dependencies
 RUN uv venv /opt/venv && \
     /opt/venv/bin/python -m pip install --upgrade pip && \
-    uv sync --frozen
+    uv pip install -e .
 
 # Production stage
 FROM python:3.10-slim as production
@@ -49,7 +49,10 @@ COPY --from=builder /opt/venv /opt/venv
 # Create app directory and copy source code
 WORKDIR /app
 COPY src/ ./src/
-COPY README.md ./
+COPY pyproject.toml README.md ./
+
+# Install the package in production stage
+RUN /opt/venv/bin/pip install -e .
 
 # Set ownership to non-root user
 RUN chown -R threatintel:threatintel /app
@@ -65,10 +68,13 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import sys; sys.exit(0)"
 
 # Default command
-CMD ["python", "-m", "src.threatintel.server"]
+CMD ["threatintel", "--help"]
 
-# Alternative entry points
+# Container metadata and labels
 LABEL org.opencontainers.image.title="FastMCP ThreatIntel"
 LABEL org.opencontainers.image.description="AI-Powered Threat Intelligence Analysis Tool"
 LABEL org.opencontainers.image.source="https://github.com/4R9UN/fastmcp-threatintel"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.author="Arjun Trivedi <arjuntrivedi42@yahoo.com>"
+LABEL org.opencontainers.image.vendor="Arjun Trivedi"
+LABEL maintainer="Arjun Trivedi <arjuntrivedi42@yahoo.com>"
