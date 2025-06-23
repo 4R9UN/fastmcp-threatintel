@@ -5,7 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/fastmcp-threatintel.svg)](https://badge.fury.io/py/fastmcp-threatintel)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/fastmcp-threatintel)](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
+[![Docker Pulls](https://img.shields.io/docker/pulls/4r9un/fastmcp-threatintel)](https://hub.docker.com/r/4r9un/fastmcp-threatintel)
 
 >🚀 **Modern, Cross-Platform Threat Intelligence Analysis Tool** powered by AI and multiple threat intelligence sources
 
@@ -78,8 +78,8 @@ poetry run threatintel analyze example.com --output-format html --open-browser
 ### Using Docker
 ```bash
 # Pull and run
-docker pull arjuntrivedi/fastmcp-threatintel:latest
-docker run -e VIRUSTOTAL_API_KEY=your_key arjuntrivedi/fastmcp-threatintel analyze 8.8.8.8
+docker pull 4r9un/fastmcp-threatintel:latest
+docker run -e VIRUSTOTAL_API_KEY=your_key 4r9un/fastmcp-threatintel analyze 8.8.8.8
 ```
 
 ### Using pip
@@ -99,14 +99,14 @@ For a hassle-free setup, run the tool inside a Docker container. This is perfect
 
 ```bash
 # Pull the latest image from Docker Hub
-docker pull arjuntrivedi/fastmcp-threatintel:latest
+docker pull 4r9un/fastmcp-threatintel:latest
 
 # Run the server, passing your API keys as environment variables
 docker run -it --rm \
   -e VIRUSTOTAL_API_KEY="your_key" \
   -e OTX_API_KEY="your_key" \
   -p 8000:8000 \
-  arjuntrivedi/fastmcp-threatintel:latest server
+  4r9un/fastmcp-threatintel:latest server
 ```
 > **Tip**: For production, use the provided `docker-compose.yml` for managed deployments.
 
@@ -487,7 +487,7 @@ uv run mkdocs build
 version: '3.8'
 services:
   threatintel:
-    image: arjuntrivedi/fastmcp-threatintel:latest
+    image: 4r9un/fastmcp-threatintel:latest
     environment:
       - VIRUSTOTAL_API_KEY=${VIRUSTOTAL_API_KEY}
       - OTX_API_KEY=${OTX_API_KEY}
@@ -539,7 +539,7 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - 🐛 [Issue Tracker](https://github.com/4R9UN/fastmcp-threatintel/issues)
 - 💬 [Discussions](https://github.com/4R9UN/fastmcp-threatintel/discussions)
 - 📦 [PyPI Package](https://pypi.org/project/fastmcp-threatintel/)
-- 🐳 [Docker Hub](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
+- 🐳 [Docker Hub](https://hub.docker.com/r/4r9un/fastmcp-threatintel)
 
 ---
 

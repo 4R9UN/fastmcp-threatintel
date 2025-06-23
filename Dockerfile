@@ -1,5 +1,5 @@
 # Multi-stage build for production-ready container
-FROM python:3.10-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -14,23 +14,23 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install UV
-RUN pip install uv
-
 # Create and set working directory
 WORKDIR /app
 
+# Add cache bust
+ARG CACHEBUST=1
+
 # Copy dependency files and source code
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 COPY src/ ./src/
 
 # Create virtual environment and install dependencies
-RUN uv venv /opt/venv && \
-    /opt/venv/bin/python -m pip install --upgrade pip && \
-    uv pip install -e .
+RUN python -m venv /opt/venv && \
+    /opt/venv/bin/pip install --upgrade pip && \
+    /opt/venv/bin/pip install -e .
 
 # Production stage
-FROM python:3.10-slim as production
+FROM python:3.11-slim AS production
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
