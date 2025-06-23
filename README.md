@@ -5,7 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/fastmcp-threatintel.svg)](https://badge.fury.io/py/fastmcp-threatintel)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Docker Pulls](https://img.shields.io/docker/pulls/4r9un/fastmcp-threatintel)](https://hub.docker.com/r/4r9un/fastmcp-threatintel)
+[![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/fastmcp-threatintel)](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
 
 >🚀 **Modern, Cross-Platform Threat Intelligence Analysis Tool** powered by AI and multiple threat intelligence sources
 
