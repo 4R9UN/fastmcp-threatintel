@@ -15,7 +15,7 @@ def create_ioc_table(iocs: list[IOC]) -> str:
     # Create markdown table
     table_lines = [
         "| IOC | Type | Reputation | Score | Reports |",
-        "|-----|------|------------|-------|---------|"
+        "|-----|------|------------|-------|---------|",
     ]
 
     for ioc in iocs:
@@ -25,51 +25,69 @@ def create_ioc_table(iocs: list[IOC]) -> str:
 
         # Truncate long values
         value = ioc.value[:50] + "..." if len(ioc.value) > 50 else ioc.value
-        reports_summary = reports_summary[:100] + "..." if len(reports_summary) > 100 else reports_summary
+        reports_summary = (
+            reports_summary[:100] + "..." if len(reports_summary) > 100 else reports_summary
+        )
 
-        table_lines.append(f"| {value} | {ioc.type.upper()} | {reputation} | {score} | {reports_summary} |")
+        table_lines.append(
+            f"| {value} | {ioc.type.upper()} | {reputation} | {score} | {reports_summary} |"
+        )
 
     return "\n".join(table_lines)
 
 
-def create_network_graph(iocs: list[IOC], attribution: APTAttribution | None = None) -> dict[str, Any]:
+def create_network_graph(
+    iocs: list[IOC], attribution: APTAttribution | None = None
+) -> dict[str, Any]:
     """Create a D3.js compatible network graph of IOCs and their relationships."""
     nodes = []
     links = []
 
     # Add IOC nodes
     for i, ioc in enumerate(iocs):
-        color = "#ff4444" if ioc.reputation == "Malicious" else "#ffaa44" if ioc.reputation == "Suspicious" else "#44aa44"
-        nodes.append({
-            "id": f"ioc_{i}",
-            "label": ioc.value,
-            "type": ioc.type,
-            "reputation": ioc.reputation,
-            "score": ioc.score,
-            "group": 1,
-            "color": color,
-            "size": max(10, (ioc.score or 0) / 5) if ioc.score else 10
-        })
+        color = (
+            "#ff4444"
+            if ioc.reputation == "Malicious"
+            else "#ffaa44"
+            if ioc.reputation == "Suspicious"
+            else "#44aa44"
+        )
+        nodes.append(
+            {
+                "id": f"ioc_{i}",
+                "label": ioc.value,
+                "type": ioc.type,
+                "reputation": ioc.reputation,
+                "score": ioc.score,
+                "group": 1,
+                "color": color,
+                "size": max(10, (ioc.score or 0) / 5) if ioc.score else 10,
+            }
+        )
 
     # Add attribution node if available
     if attribution and attribution.actor and attribution.actor != "Unknown":
-        nodes.append({
-            "id": "apt_actor",
-            "label": attribution.actor,
-            "type": "apt",
-            "group": 2,
-            "color": "#aa44aa",
-            "size": 20
-        })
+        nodes.append(
+            {
+                "id": "apt_actor",
+                "label": attribution.actor,
+                "type": "apt",
+                "group": 2,
+                "color": "#aa44aa",
+                "size": 20,
+            }
+        )
 
         # Link IOCs to APT actor
         for i in range(len(iocs)):
-            links.append({
-                "source": f"ioc_{i}",
-                "target": "apt_actor",
-                "type": "attributed_to",
-                "strength": attribution.confidence / 100 if attribution.confidence else 0.5
-            })
+            links.append(
+                {
+                    "source": f"ioc_{i}",
+                    "target": "apt_actor",
+                    "type": "attributed_to",
+                    "strength": attribution.confidence / 100 if attribution.confidence else 0.5,
+                }
+            )
 
     # Add geolocation nodes for IP addresses
     countries = {}
@@ -83,16 +101,13 @@ def create_network_graph(iocs: list[IOC], attribution: APTAttribution | None = N
                     "type": "country",
                     "group": 3,
                     "color": "#4444aa",
-                    "size": 15
+                    "size": 15,
                 }
                 nodes.append(countries[country_id])
 
-            links.append({
-                "source": f"ioc_{i}",
-                "target": country_id,
-                "type": "located_in",
-                "strength": 0.3
-            })
+            links.append(
+                {"source": f"ioc_{i}", "target": country_id, "type": "located_in", "strength": 0.3}
+            )
 
     return {
         "nodes": nodes,
@@ -100,8 +115,8 @@ def create_network_graph(iocs: list[IOC], attribution: APTAttribution | None = N
         "metadata": {
             "total_nodes": len(nodes),
             "total_links": len(links),
-            "generated_at": datetime.now().isoformat()
-        }
+            "generated_at": datetime.now().isoformat(),
+        },
     }
 
 
@@ -109,7 +124,7 @@ def create_interactive_report(
     iocs: list[IOC],
     attribution: APTAttribution | None = None,
     report_id: str = "report",
-    include_graph: bool = True
+    include_graph: bool = True,
 ) -> str:
     """Create an interactive HTML report with visualizations."""
 
@@ -279,7 +294,7 @@ def create_interactive_report(
     <div class="container">
         <div class="header">
             <h1>🛡️ ThreatIntel Analysis Report</h1>
-            <p>Report ID: {report_id} | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p>Report ID: {report_id} | Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
         </div>
 
         <div class="summary">
@@ -320,7 +335,7 @@ def create_interactive_report(
                     </div>
                     <p>{attribution.confidence}% confidence</p>
                     <p><strong>Summary:</strong> {attribution.summary}</p>
-                    <p><strong>MITRE ATT&CK Techniques:</strong> {', '.join(attribution.mitre_techniques)}</p>
+                    <p><strong>MITRE ATT&CK Techniques:</strong> {", ".join(attribution.mitre_techniques)}</p>
                 </div>
             </div>
 """
@@ -345,10 +360,14 @@ def create_interactive_report(
 
     # Add IOC rows
     for ioc in iocs:
-        reputation_class = f"reputation-{ioc.reputation.lower()}" if ioc.reputation else "reputation-unknown"
+        reputation_class = (
+            f"reputation-{ioc.reputation.lower()}" if ioc.reputation else "reputation-unknown"
+        )
         reputation_text = ioc.reputation or "Unknown"
         score_text = f"{ioc.score:.1f}" if ioc.score is not None else "N/A"
-        location = f"{ioc.city}, {ioc.country}" if ioc.city and ioc.country else (ioc.country or "Unknown")
+        location = (
+            f"{ioc.city}, {ioc.country}" if ioc.city and ioc.country else (ioc.country or "Unknown")
+        )
         reports_summary = "; ".join(ioc.reports[:2]) if ioc.reports else "No reports"
 
         html_content += f"""
@@ -358,7 +377,7 @@ def create_interactive_report(
                             <td><span class="reputation-badge {reputation_class}">{reputation_text}</span></td>
                             <td>{score_text}</td>
                             <td>{location}</td>
-                            <td title="{reports_summary}">{reports_summary[:100]}{'...' if len(reports_summary) > 100 else ''}</td>
+                            <td title="{reports_summary}">{reports_summary[:100]}{"..." if len(reports_summary) > 100 else ""}</td>
                         </tr>
 """
 

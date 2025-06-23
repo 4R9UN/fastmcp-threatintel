@@ -17,8 +17,10 @@ logger = logging.getLogger("threatintel.api")
 # Cache for API responses
 cache: dict[str, tuple[Any, datetime]] = {}
 
+
 class IOC(BaseModel):
     """Indicator of Compromise data model."""
+
     value: str
     type: str  # e.g., "ip", "hash", "domain", "url", "md5", "sha1", "sha256"
     reputation: str | None = None
@@ -36,8 +38,10 @@ class IOC(BaseModel):
     asn: str | None = None
     location: str | None = None
 
+
 class APTAttribution(BaseModel):
     """Advanced Persistent Threat attribution data model."""
+
     actor: str | None = None
     group: str | None = None
     target_region: str | None = None
@@ -76,10 +80,11 @@ def get_cache_key(func_name: str, *args) -> str:
 
 def cached_api_call(ttl_seconds: int | None = None):
     """Decorator for caching API call results."""
+
     def decorator(func: Callable) -> Callable:
         async def wrapper(*args, **kwargs) -> Any:
             # Extract context from kwargs
-            ctx = kwargs.get('ctx')
+            ctx = kwargs.get("ctx")
 
             # Use provided TTL or default from settings
             ttl = ttl_seconds or settings.cache_ttl
@@ -103,20 +108,18 @@ def cached_api_call(ttl_seconds: int | None = None):
             cache[cache_key] = (result, datetime.now() + timedelta(seconds=ttl))
 
             return result
+
         return wrapper
+
     return decorator
 
 
 async def retry_api_call(
-    func: Callable,
-    *args,
-    max_retries: int | None = None,
-    delay_base: float = 1.0,
-    **kwargs
+    func: Callable, *args, max_retries: int | None = None, delay_base: float = 1.0, **kwargs
 ) -> Any:
     """Retry API calls with exponential backoff."""
     retries = max_retries or settings.max_retries
-    ctx = kwargs.pop('ctx', None)  # Remove ctx from kwargs before passing to func
+    ctx = kwargs.pop("ctx", None)  # Remove ctx from kwargs before passing to func
     last_exception = None
 
     for attempt in range(retries + 1):
@@ -129,7 +132,7 @@ async def retry_api_call(
                 raise e from None
 
             # Calculate backoff delay
-            delay = delay_base * (2 ** attempt)
+            delay = delay_base * (2**attempt)
             if ctx:
                 await ctx.warning(f"API call failed: {str(e)}. Retrying in {delay:.2f}s...")
             await anyio.sleep(delay)
@@ -146,10 +149,20 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     if not settings.virustotal_api_key:
         await ctx.warning("VirusTotal API key not configured")
         return IOC(
-            value=ioc, type=ioc_type, reputation="Unknown",
-            reports=["VirusTotal: API key not configured"], score=None,
-            abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None)
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=["VirusTotal: API key not configured"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
     # Map IOC types to VirusTotal endpoints
     base_url = "https://www.virustotal.com/api/v3"
@@ -171,30 +184,35 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
 
     if not endpoint_type:
         await ctx.error(f"Unsupported IOC type for VirusTotal: {ioc_type}")
-        return IOC(value=ioc, type=ioc_type, reputation="Unknown",
-                  reports=[f"VirusTotal: Unsupported IOC type '{ioc_type}'"], score=None,
-                  abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                  city=None, region=None, country=None, asn=None, location=None)
+        return IOC(
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[f"VirusTotal: Unsupported IOC type '{ioc_type}'"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
     # Special handling for URLs - need to hash them first
     url = f"{base_url}/{endpoint_type}/{ioc}"
     if normalized_type == "url":
         import base64
+
         url_id = base64.urlsafe_b64encode(ioc.encode()).decode().strip("=")
         url = f"{base_url}/{endpoint_type}/{url_id}"
 
-    headers = {
-        "x-apikey": settings.virustotal_api_key,
-        "User-Agent": settings.user_agent
-    }
+    headers = {"x-apikey": settings.virustotal_api_key, "User-Agent": settings.user_agent}
 
     async def _make_request() -> IOC:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url,
-                headers=headers,
-                timeout=settings.request_timeout
-            )
+            response = await client.get(url, headers=headers, timeout=settings.request_timeout)
             response.raise_for_status()
             return response.json()
 
@@ -224,7 +242,8 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
 
         # Get detection engines
         engines = [
-            engine for engine, result in attributes.get("last_analysis_results", {}).items()
+            engine
+            for engine, result in attributes.get("last_analysis_results", {}).items()
             if result.get("category") in ["malicious", "suspicious"]
         ]
 
@@ -262,29 +281,63 @@ async def query_virustotal(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             country=None,
             asn=None,
             location=None,
-            abuseipdb_confidence=None)
+            abuseipdb_confidence=None,
+        )
 
     except httpx.HTTPStatusError as e:
         error_message = f"VirusTotal API error ({e.response.status_code}): {e.response.text}"
         await ctx.error(error_message)
         return IOC(
-            value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None)
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[error_message],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
     except httpx.TimeoutException as e:
         error_message = f"VirusTotal API timeout: {str(e)}"
         await ctx.error(error_message)
         return IOC(
-            value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None)
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[error_message],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
     except Exception as e:
         error_message = f"VirusTotal API error: {str(e)}"
         await ctx.error(error_message)
         return IOC(
-            value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None)
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[error_message],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
 
 @cached_api_call()
@@ -293,10 +346,20 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     if not settings.otx_api_key:
         await ctx.warning("OTX API key not configured")
         return IOC(
-            value=ioc, type=ioc_type, reputation="Unknown",
-            reports=["OTX: API key not configured"], score=None,
-            abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None)
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=["OTX: API key not configured"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
     # Map IOC types to OTX endpoint sections
     ioc_type_map = {
@@ -313,27 +376,31 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
 
     if not endpoint_type:
         await ctx.error(f"Unsupported IOC type for OTX: {ioc_type}")
-        return IOC(value=ioc, type=ioc_type, reputation="Unknown",
-                  reports=[f"OTX: Unsupported IOC type '{ioc_type}'"],
-                  score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                  city=None, region=None, country=None, asn=None, location=None)
+        return IOC(
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[f"OTX: Unsupported IOC type '{ioc_type}'"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
     # Set up API call
     base_url = "https://otx.alienvault.com/api/v1/indicators"
     url = f"{base_url}/{endpoint_type}/{ioc}/general"
 
-    headers = {
-        "X-OTX-API-KEY": settings.otx_api_key,
-        "User-Agent": settings.user_agent
-    }
+    headers = {"X-OTX-API-KEY": settings.otx_api_key, "User-Agent": settings.user_agent}
 
     async def _make_request() -> Any:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                url,
-                headers=headers,
-                timeout=settings.request_timeout
-            )
+            response = await client.get(url, headers=headers, timeout=settings.request_timeout)
             response.raise_for_status()
             return response.json()
 
@@ -390,14 +457,27 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             country=None,
             asn=None,
             location=None,
-            abuseipdb_confidence=None)
+            abuseipdb_confidence=None,
+        )
 
     except httpx.HTTPStatusError as e:
         error_message = f"OTX API error: {e.response.status_code} - {e.response.text}"
         await ctx.error(error_message)
-        return IOC(value=ioc, type=ioc_type, reputation="Unknown", reports=[error_message],
-                   score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                   city=None, region=None, country=None, asn=None, location=None)
+        return IOC(
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[error_message],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
     except Exception as e:
         error_message = f"OTX API error: {str(e)}"
         await ctx.error(error_message)
@@ -414,8 +494,9 @@ async def query_otx(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             region=None,
             country=None,
             asn=None,
-            location=None
+            location=None,
         )
+
 
 @cached_api_call()
 async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
@@ -423,12 +504,19 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     if not settings.abuseipdb_api_key:
         await ctx.warning("AbuseIPDB API key not configured")
         return IOC(
-           value=ioc,
-           type=ioc_type,
-           reputation="Unknown",
-           reports=["AbuseIPDB: API key not configured"],
-           score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-           city=None, region=None, country=None, asn=None, location=None
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=["AbuseIPDB: API key not configured"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
 
     # AbuseIPDB only supports IP addresses
@@ -436,12 +524,19 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     if normalized_type != "ip":
         await ctx.debug(f"AbuseIPDB only supports IP addresses, not {ioc_type}")
         return IOC(
-           value=ioc,
-           type=ioc_type,
-           reputation="Unknown",
-           reports=["AbuseIPDB: Only supports IP addresses"],
-           score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-           city=None, region=None, country=None, asn=None, location=None
+            value=ioc,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=["AbuseIPDB: Only supports IP addresses"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
 
     # Set up API call
@@ -451,16 +546,13 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
     headers = {
         "Key": settings.abuseipdb_api_key,
         "Accept": "application/json",
-        "User-Agent": settings.user_agent
+        "User-Agent": settings.user_agent,
     }
 
     async def _make_request() -> Any:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                base_url,
-                params=params,
-                headers=headers,
-                timeout=settings.request_timeout
+                base_url, params=params, headers=headers, timeout=settings.request_timeout
             )
             response.raise_for_status()
             return response.json()
@@ -515,7 +607,7 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             region=None,
             country=None,
             asn=None,
-            location=None
+            location=None,
         )
 
     except httpx.HTTPStatusError as e:
@@ -526,8 +618,15 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
     except Exception as e:
         error_message = f"AbuseIPDB API error: {str(e)}"
@@ -537,9 +636,17 @@ async def query_abuseipdb(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
+
 
 @cached_api_call()
 async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
@@ -551,8 +658,15 @@ async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=["IPinfo: API key not configured"],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
 
     # IPinfo only supports IP addresses
@@ -564,26 +678,27 @@ async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=["IPinfo: Only supports IP addresses"],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
 
     # Set up API call
     base_url = f"https://ipinfo.io/{ioc}"
     params = {"token": settings.ipinfo_api_key}
 
-    headers = {
-        "Accept": "application/json",
-        "User-Agent": settings.user_agent
-    }
+    headers = {"Accept": "application/json", "User-Agent": settings.user_agent}
 
     async def _make_request() -> Any:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                base_url,
-                params=params,
-                headers=headers,
-                timeout=settings.request_timeout
+                base_url, params=params, headers=headers, timeout=settings.request_timeout
             )
             response.raise_for_status()
             return response.json()
@@ -625,7 +740,8 @@ async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             country=country,
             asn=asn,
             location=location,
-            abuseipdb_confidence=None)
+            abuseipdb_confidence=None,
+        )
 
     except httpx.HTTPStatusError as e:
         error_message = f"IPinfo API error: {e.response.status_code} - {e.response.text}"
@@ -635,8 +751,15 @@ async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
     except Exception as e:
         error_message = f"IPinfo API error: {str(e)}"
@@ -646,6 +769,13 @@ async def query_ipinfo(ioc: str, ioc_type: str, ctx: Context) -> IOC:
             type=ioc_type,
             reputation="Unknown",
             reports=[error_message],
-            score=None, abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )

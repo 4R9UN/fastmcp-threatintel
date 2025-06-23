@@ -1,4 +1,5 @@
 """Registers the tools with the MCP server."""
+
 import asyncio
 import json
 import logging
@@ -41,6 +42,7 @@ from .visualizations import (
 # Configure logger
 logger = logging.getLogger("threatintel.tools")
 
+
 async def get_ioc_type(ioc_string: str, ctx: Context) -> str:
     """Determines the IOC type from the string pattern."""
     # IP address pattern
@@ -60,12 +62,16 @@ async def get_ioc_type(ioc_string: str, ctx: Context) -> str:
         return "url"
 
     # Domain pattern (less specific, checked after URL)
-    if re.match(r"^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]))\.([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$", ioc_string):
+    if re.match(
+        r"^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]))\.([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}\.[a-zA-Z]{2,3})$",
+        ioc_string,
+    ):
         return "domain"
 
     # Default fallback for unknown patterns
     await ctx.warning(f"Could not determine IOC type for: {ioc_string}")
     return "unknown"
+
 
 async def process_single_ioc(ioc_value: str, ioc_type: str, ctx: Context) -> IOC:
     """Process a single IOC by querying all available intelligence sources in parallel."""
@@ -87,10 +93,21 @@ async def process_single_ioc(ioc_value: str, ioc_type: str, ctx: Context) -> IOC
         results = await asyncio.gather(*tasks, return_exceptions=True)
     except Exception as e:
         await ctx.error(f"Error querying intelligence sources: {str(e)}")
-        return IOC(value=ioc_value, type=ioc_type, reputation="Unknown",
-                    reports=[f"Error: {str(e)}"], score=None, abuseipdb_confidence=None,
-                    first_seen=None, last_seen=None, city=None, region=None,
-                    country=None, asn=None, location=None)
+        return IOC(
+            value=ioc_value,
+            type=ioc_type,
+            reputation="Unknown",
+            reports=[f"Error: {str(e)}"],
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        )
 
     # Process results and handle any exceptions
     ioc_results = []
@@ -99,22 +116,61 @@ async def process_single_ioc(ioc_value: str, ioc_type: str, ctx: Context) -> IOC
             source = ["VirusTotal", "OTX", "AbuseIPDB"][min(i, 2)]
             await ctx.error(f"Error from {source}: {str(result)}")
             # Create an empty result for this source
-            ioc_results.append(IOC(value=ioc_value, type=ioc_type, reputation="Unknown",
-                                    reports=[f"{source} error: {str(result)}"], score=None,
-                                    abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                                    city=None, region=None, country=None, asn=None, location=None))
+            ioc_results.append(
+                IOC(
+                    value=ioc_value,
+                    type=ioc_type,
+                    reputation="Unknown",
+                    reports=[f"{source} error: {str(result)}"],
+                    score=None,
+                    abuseipdb_confidence=None,
+                    first_seen=None,
+                    last_seen=None,
+                    city=None,
+                    region=None,
+                    country=None,
+                    asn=None,
+                    location=None,
+                )
+            )
         else:
             ioc_results.append(result)
 
     # Extract all sources
-    otx = next((r for r in ioc_results if r.reports and "OTX" in r.reports[0]),
-                IOC(value=ioc_value, type=ioc_type, reputation="Unknown", score=None,
-                    abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                    city=None, region=None, country=None, asn=None, location=None))
-    abuse = next((r for r in ioc_results if r.reports and "AbuseIPDB" in r.reports[0]),
-                IOC(value=ioc_value, type=ioc_type, reputation="Unknown", score=None,
-                    abuseipdb_confidence=None, first_seen=None, last_seen=None,
-                    city=None, region=None, country=None, asn=None, location=None))
+    otx = next(
+        (r for r in ioc_results if r.reports and "OTX" in r.reports[0]),
+        IOC(
+            value=ioc_value,
+            type=ioc_type,
+            reputation="Unknown",
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        ),
+    )
+    abuse = next(
+        (r for r in ioc_results if r.reports and "AbuseIPDB" in r.reports[0]),
+        IOC(
+            value=ioc_value,
+            type=ioc_type,
+            reputation="Unknown",
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
+        ),
+    )
 
     # Determine overall reputation
     reputations = [r.reputation for r in ioc_results if r.reputation is not None]
@@ -175,8 +231,9 @@ async def process_single_ioc(ioc_value: str, ioc_type: str, ctx: Context) -> IOC
         region=region,
         country=country,
         asn=asn,
-        location=location
+        location=location,
     )
+
 
 async def analyze_iocs_from_file(file_path: str, ctx: Context) -> str:
     """Read IOCs from a file and analyze them."""
@@ -199,6 +256,7 @@ async def analyze_iocs_from_file(file_path: str, ctx: Context) -> str:
         await ctx.error(f"Error processing file: {str(e)}")
         return f"Error: {str(e)}"
 
+
 async def determine_attribution(iocs: list[IOC], ctx: Context) -> APTAttribution:
     """
     Determine APT attribution based on IOC characteristics.
@@ -215,35 +273,63 @@ async def determine_attribution(iocs: list[IOC], ctx: Context) -> APTAttribution
     for ioc in iocs:
         all_tags.update(ioc.tags or [])
         all_reports.extend(ioc.reports or [])
-        if hasattr(ioc, 'otx_pulses') and ioc.otx_pulses:
+        if hasattr(ioc, "otx_pulses") and ioc.otx_pulses:
             pulse_names.extend(ioc.otx_pulses)
 
     # Define comprehensive attribution patterns (in a real system, this would be much more sophisticated)
     apt_patterns = {
         "APT29": {
-            "tags": {"Russia", "CozyBear", "Cozy Bear", "SVR", "government", "APT29", "Nobelium", "The Dukes"},
+            "tags": {
+                "Russia",
+                "CozyBear",
+                "Cozy Bear",
+                "SVR",
+                "government",
+                "APT29",
+                "Nobelium",
+                "The Dukes",
+            },
             "techniques": ["T1566", "T1104", "T1573"],
             "group": "Cozy Bear",
             "region": "North America, Europe",
             "motive": "Espionage",
-            "summary": "APT29, also known as Cozy Bear, is a Russian state-sponsored group active since at least 2008. Recent activity includes targeting government and critical infrastructure in 2024."
+            "summary": "APT29, also known as Cozy Bear, is a Russian state-sponsored group active since at least 2008. Recent activity includes targeting government and critical infrastructure in 2024.",
         },
         "APT28": {
-            "tags": {"Russia", "FancyBear", "Fancy Bear", "GRU", "military", "APT28", "Fighting Ursa", "Sofacy", "Sednit", "Pawn Storm", "Strontium"},
+            "tags": {
+                "Russia",
+                "FancyBear",
+                "Fancy Bear",
+                "GRU",
+                "military",
+                "APT28",
+                "Fighting Ursa",
+                "Sofacy",
+                "Sednit",
+                "Pawn Storm",
+                "Strontium",
+            },
             "techniques": ["T1566.001", "T1012", "T1489"],
             "group": "Fancy Bear",
             "region": "Eastern Europe, NATO countries",
             "motive": "Military Intelligence",
-            "summary": "APT28, also known as Fancy Bear or Fighting Ursa, is a Russian military intelligence group that primarily targets government, military, and security organizations."
+            "summary": "APT28, also known as Fancy Bear or Fighting Ursa, is a Russian military intelligence group that primarily targets government, military, and security organizations.",
         },
         "Lazarus": {
-            "tags": {"North Korea", "DPRK", "financial", "cryptocurrency", "Lazarus", "HIDDEN COBRA"},
+            "tags": {
+                "North Korea",
+                "DPRK",
+                "financial",
+                "cryptocurrency",
+                "Lazarus",
+                "HIDDEN COBRA",
+            },
             "techniques": ["T1133", "T1190", "T1486"],
             "group": "Lazarus Group",
             "region": "Global, Financial Sector",
             "motive": "Financial Gain, Sanctions Evasion",
-            "summary": "Lazarus Group is a North Korean state-sponsored threat actor known for financial theft, cryptocurrency heists, and destructive attacks."
-        }
+            "summary": "Lazarus Group is a North Korean state-sponsored threat actor known for financial theft, cryptocurrency heists, and destructive attacks.",
+        },
         # More groups would be defined here
     }
 
@@ -275,7 +361,7 @@ async def determine_attribution(iocs: list[IOC], ctx: Context) -> APTAttribution
             motive="Unknown",
             summary="Insufficient data for attribution",
             mitre_techniques=[],
-            confidence=0
+            confidence=0,
         )
 
     # Get the matched APT data
@@ -286,12 +372,16 @@ async def determine_attribution(iocs: list[IOC], ctx: Context) -> APTAttribution
         actor=best_match,
         group=apt_data["group"],
         target_region=apt_data["region"],
-        target_sectors=["Government", "Critical Infrastructure"],  # Would be derived from actual data
+        target_sectors=[
+            "Government",
+            "Critical Infrastructure",
+        ],  # Would be derived from actual data
         motive=apt_data["motive"],
         summary=apt_data["summary"],
         mitre_techniques=apt_data["techniques"],
-        confidence=confidence
+        confidence=confidence,
     )
+
 
 def create_stix_output(iocs: list[IOC], attribution: APTAttribution) -> dict[str, Any]:
     """Create a STIX-like JSON representation of the analyzed data."""
@@ -310,7 +400,7 @@ def create_stix_output(iocs: list[IOC], attribution: APTAttribution) -> dict[str
             "valid_from": timestamp,
             "labels": [ioc.reputation.lower()] if ioc.reputation else ["unknown"],
             "description": "; ".join(ioc.reports) if ioc.reports else "",
-            "pattern_type": "stix"
+            "pattern_type": "stix",
         }
         indicators.append(indicator)
 
@@ -328,7 +418,7 @@ def create_stix_output(iocs: list[IOC], attribution: APTAttribution) -> dict[str
             "threat_actor_types": ["state-sponsored"],
             "sophistication": "advanced",
             "resource_level": "government",
-            "primary_motivation": attribution.motive.lower() if attribution.motive else "unknown"
+            "primary_motivation": attribution.motive.lower() if attribution.motive else "unknown",
         }
         threat_actors.append(threat_actor)
 
@@ -343,7 +433,7 @@ def create_stix_output(iocs: list[IOC], attribution: APTAttribution) -> dict[str
                 "source_ref": f"indicator--{hash(ioc.value)}",
                 "target_ref": f"threat-actor--{hash(attribution.actor)}",
                 "description": f"This indicator is attributed to {attribution.actor}",
-                "confidence": attribution.confidence
+                "confidence": attribution.confidence,
             }
             indicators.append(relationship)
 
@@ -351,7 +441,7 @@ def create_stix_output(iocs: list[IOC], attribution: APTAttribution) -> dict[str
     return {
         "type": "bundle",
         "id": f"bundle--{hash(timestamp)}",
-        "objects": indicators + threat_actors
+        "objects": indicators + threat_actors,
     }
 
 
@@ -359,13 +449,24 @@ def _merge_ioc_results(ioc_value: str, ioc_type: str, source_iocs: list[IOC]) ->
     """Merges multiple IOC data points from different sources into a single IOC object."""
     if not source_iocs:
         return IOC(
-            value=ioc_value, type=ioc_type, reputation="Unknown", score=None,
-            abuseipdb_confidence=None, first_seen=None, last_seen=None,
-            city=None, region=None, country=None, asn=None, location=None
+            value=ioc_value,
+            type=ioc_type,
+            reputation="Unknown",
+            score=None,
+            abuseipdb_confidence=None,
+            first_seen=None,
+            last_seen=None,
+            city=None,
+            region=None,
+            country=None,
+            asn=None,
+            location=None,
         )
 
     # Determine overall reputation, ignoring purely informational sources
-    reputations = [r.reputation for r in source_iocs if r.reputation and r.reputation != "Informational"]
+    reputations = [
+        r.reputation for r in source_iocs if r.reputation and r.reputation != "Informational"
+    ]
     if "Malicious" in reputations:
         reputation = "Malicious"
     elif "Suspicious" in reputations:
@@ -424,13 +525,18 @@ def _merge_ioc_results(ioc_value: str, ioc_type: str, source_iocs: list[IOC]) ->
         region=region,
         country=country,
         asn=asn,
-        location=location
+        location=location,
     )
 
 
-async def _analyze_iocs_impl(ioc_string: str | None = None, iocs: list[dict] | None = None,
-                           output_format: str = "markdown", include_stix: bool = True,
-                           include_graph: bool = True, ctx: Context | None = None) -> str:
+async def _analyze_iocs_impl(
+    ioc_string: str | None = None,
+    iocs: list[dict] | None = None,
+    output_format: str = "markdown",
+    include_stix: bool = True,
+    include_graph: bool = True,
+    ctx: Context | None = None,
+) -> str:
     """
     Internal implementation of IOC analysis.
 
@@ -460,7 +566,7 @@ async def _analyze_iocs_impl(ioc_string: str | None = None, iocs: list[dict] | N
     if isinstance(iocs, list):
         indicators_to_process.extend(iocs)
     if isinstance(ioc_string, str) and ioc_string.strip():
-        ioc_values = re.split(r'[\s,;\n]+', ioc_string.strip())
+        ioc_values = re.split(r"[\s,;\n]+", ioc_string.strip())
         indicators_to_process.extend([{"value": v.strip()} for v in ioc_values if v.strip()])
 
     if not indicators_to_process:
@@ -535,10 +641,7 @@ async def _analyze_iocs_impl(ioc_string: str | None = None, iocs: list[dict] | N
 
         # Generate HTML report regardless of format choice for saving
         html_report = create_interactive_report(
-            processed_iocs,
-            attribution,
-            report_id,
-            include_graph=include_graph
+            processed_iocs, attribution, report_id, include_graph=include_graph
         )
 
         # Save HTML report to temp directory
@@ -560,16 +663,20 @@ async def _analyze_iocs_impl(ioc_string: str | None = None, iocs: list[dict] | N
             json_output = {
                 "summary": {
                     "total_iocs": len(processed_iocs),
-                    "malicious_iocs": sum(1 for ioc in processed_iocs if ioc.reputation == "Malicious"),
-                    "suspicious_iocs": sum(1 for ioc in processed_iocs if ioc.reputation == "Suspicious"),
+                    "malicious_iocs": sum(
+                        1 for ioc in processed_iocs if ioc.reputation == "Malicious"
+                    ),
+                    "suspicious_iocs": sum(
+                        1 for ioc in processed_iocs if ioc.reputation == "Suspicious"
+                    ),
                     "clean_iocs": sum(1 for ioc in processed_iocs if ioc.reputation == "Clean"),
                     "report_id": report_id,
                     "report_time": datetime.now().isoformat(),
-                    "elapsed_time": elapsed_time
+                    "elapsed_time": elapsed_time,
                 },
                 "iocs": [ioc.dict() for ioc in processed_iocs],
                 "attribution": attribution.dict() if attribution else None,
-                "html_report_path": report_filename
+                "html_report_path": report_filename,
             }
 
             if include_graph:
@@ -644,13 +751,19 @@ An interactive HTML report has been saved to `{report_filename}`.
         await ctx.error(f"Error generating report: {str(e)}")
         return f"Error generating report: {str(e)}"
 
+
 def register_tools(mcp: FastMCP):
     """Registers the tools with the MCP server."""
 
     @mcp.tool()
-    async def analyze_iocs(ioc_string: str | None = None, iocs: list[dict] | None = None,
-                          output_format: str = "markdown", include_stix: bool = True,
-                          include_graph: bool = True, ctx: Context | None = None) -> str:
+    async def analyze_iocs(
+        ioc_string: str | None = None,
+        iocs: list[dict] | None = None,
+        output_format: str = "markdown",
+        include_stix: bool = True,
+        include_graph: bool = True,
+        ctx: Context | None = None,
+    ) -> str:
         """
         Analyze IOCs (Indicators of Compromise) using multiple threat intelligence sources.
 
@@ -665,4 +778,6 @@ def register_tools(mcp: FastMCP):
         Returns:
             A report with IOC analysis in the specified format
         """
-        return await _analyze_iocs_impl(ioc_string, iocs, output_format, include_stix, include_graph, ctx)
+        return await _analyze_iocs_impl(
+            ioc_string, iocs, output_format, include_stix, include_graph, ctx
+        )

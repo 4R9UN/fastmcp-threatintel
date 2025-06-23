@@ -12,15 +12,17 @@ from .tools import analyze_iocs_from_file, process_single_ioc, register_tools
 # Create a logger
 logger = logging.getLogger("threatintel")
 
+
 def configure_logging(log_level: str = "INFO"):
     """Configure logging for the application."""
     level = getattr(logging, log_level.upper())
     logging.basicConfig(
         level=level,
         stream=sys.stderr,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
     logger.setLevel(level)
+
 
 def create_server():
     """Create and configure the MCP server with all tools registered."""
@@ -33,7 +35,9 @@ def create_server():
         logger.error(f"Failed to create MCP server: {str(e)}")
         raise
 
+
 app = typer.Typer(help="ThreatIntel MCP Server - Analyze IOCs using threat intelligence services")
+
 
 def _override_api_keys(
     vt_api_key: str | None,
@@ -53,12 +57,15 @@ def _override_api_keys(
         os.environ["ABUSEIPDB_API_KEY"] = abuseipdb_api_key
         settings.abuseipdb_api_key = abuseipdb_api_key
 
+
 @app.command()
 def run(
     log_level: str = typer.Option("INFO", help="Logging level (DEBUG, INFO, WARNING, ERROR)"),
     vt_api_key: str | None = typer.Option(None, help="VirusTotal API key (overrides environment)"),
     otx_api_key: str | None = typer.Option(None, help="OTX API key (overrides environment)"),
-    abuseipdb_api_key: str | None = typer.Option(None, help="AbuseIPDB API key (overrides environment)"),
+    abuseipdb_api_key: str | None = typer.Option(
+        None, help="AbuseIPDB API key (overrides environment)"
+    ),
 ):
     """Run the ThreatIntel MCP server."""
     configure_logging(log_level)
@@ -71,6 +78,7 @@ def run(
     except Exception as e:
         logger.critical(f"Server failed to start: {str(e)}")
         sys.exit(1)
+
 
 @app.command()
 def batch(
@@ -90,6 +98,7 @@ def batch(
         await analyze_iocs_from_file(file_path, mock_ctx)
 
     asyncio.run(_run_batch())
+
 
 @app.command()
 def interactive(
@@ -123,9 +132,11 @@ def interactive(
 
     asyncio.run(_run_interactive())
 
+
 def main():
     """Entry point for the CLI."""
     app()
+
 
 if __name__ == "__main__":
     main()

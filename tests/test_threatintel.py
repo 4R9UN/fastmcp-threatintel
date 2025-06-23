@@ -44,7 +44,7 @@ class TestIOCModel:
             engines=["Engine1", "Engine2"],
             reports=["Detected as malware"],
             city="New York",
-            country="US"
+            country="US",
         )
         assert ioc.value == "192.168.1.1"
         assert ioc.reputation == "Malicious"
@@ -58,11 +58,7 @@ class TestAPTAttributionModel:
 
     def test_apt_attribution_creation(self):
         """Test APT attribution model creation."""
-        attribution = APTAttribution(
-            actor="APT29",
-            group="Cozy Bear",
-            confidence=85
-        )
+        attribution = APTAttribution(actor="APT29", group="Cozy Bear", confidence=85)
         assert attribution.actor == "APT29"
         assert attribution.group == "Cozy Bear"
         assert attribution.confidence == 85
@@ -80,9 +76,10 @@ class TestAPIFunctions:
 
         # Reload settings to pick up new environment
         from src.threatintel.settings import Settings
+
         settings = Settings()
 
-        with patch('src.threatintel.threatintel.settings', settings):
+        with patch("src.threatintel.threatintel.settings", settings):
             result = await check_api_keys(mock_context)
             assert result is True
 
@@ -94,9 +91,10 @@ class TestAPIFunctions:
         monkeypatch.delenv("ABUSEIPDB_API_KEY", raising=False)
 
         from src.threatintel.settings import Settings
+
         settings = Settings()
 
-        with patch('src.threatintel.threatintel.settings', settings):
+        with patch("src.threatintel.threatintel.settings", settings):
             result = await check_api_keys(mock_context)
             assert result is True  # Should return True if at least one key is available
             mock_context.warning.assert_called()
@@ -104,13 +102,13 @@ class TestAPIFunctions:
     @pytest.mark.anyio
     async def test_query_virustotal_success(self, mock_context, mock_api_responses):
         """Test successful VirusTotal query."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
             mock_settings.cache_ttl = 300
 
-            with patch('httpx.AsyncClient') as mock_client:
+            with patch("httpx.AsyncClient") as mock_client:
                 mock_response = Mock()
                 mock_response.json.return_value = mock_api_responses["virustotal"]
                 mock_response.raise_for_status.return_value = None
@@ -127,7 +125,7 @@ class TestAPIFunctions:
     @pytest.mark.anyio
     async def test_query_virustotal_no_api_key(self, mock_context):
         """Test VirusTotal query without API key."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.virustotal_api_key = None
             mock_settings.cache_ttl = 300
 
@@ -140,13 +138,13 @@ class TestAPIFunctions:
     @pytest.mark.anyio
     async def test_query_otx_success(self, mock_context, mock_api_responses):
         """Test successful OTX query."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.otx_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
             mock_settings.cache_ttl = 300
 
-            with patch('httpx.AsyncClient') as mock_client:
+            with patch("httpx.AsyncClient") as mock_client:
                 mock_response = Mock()
                 mock_response.json.return_value = mock_api_responses["otx"]
                 mock_response.raise_for_status.return_value = None
@@ -163,13 +161,13 @@ class TestAPIFunctions:
     @pytest.mark.anyio
     async def test_query_abuseipdb_success(self, mock_context, mock_api_responses):
         """Test successful AbuseIPDB query."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.abuseipdb_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
             mock_settings.cache_ttl = 300
 
-            with patch('httpx.AsyncClient') as mock_client:
+            with patch("httpx.AsyncClient") as mock_client:
                 mock_response = Mock()
                 mock_response.json.return_value = mock_api_responses["abuseipdb"]
                 mock_response.raise_for_status.return_value = None
@@ -186,7 +184,7 @@ class TestAPIFunctions:
     @pytest.mark.anyio
     async def test_query_abuseipdb_non_ip(self, mock_context):
         """Test AbuseIPDB query with non-IP IOC."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.abuseipdb_api_key = "test_key"
             mock_settings.cache_ttl = 300
 
@@ -210,7 +208,7 @@ class TestCaching:
         cached_result = IOC(value="test", type="test")
         cache[cache_key] = (cached_result, datetime.now().replace(year=2030))  # Far future
 
-        @patch('src.threatintel.threatintel.cached_api_call')
+        @patch("src.threatintel.threatintel.cached_api_call")
         def mock_cached_function():
             return cached_result
 
@@ -224,19 +222,20 @@ class TestErrorHandling:
     @pytest.mark.anyio
     async def test_virustotal_http_error(self, mock_context):
         """Test VirusTotal HTTP error handling."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
             mock_settings.cache_ttl = 300
 
-            with patch('httpx.AsyncClient') as mock_client:
+            with patch("httpx.AsyncClient") as mock_client:
                 mock_response = Mock()
                 mock_response.status_code = 403
                 mock_response.text = "Forbidden"
 
-                mock_client.return_value.__aenter__.return_value.get.side_effect = \
+                mock_client.return_value.__aenter__.return_value.get.side_effect = (
                     httpx.HTTPStatusError("403 Forbidden", request=Mock(), response=mock_response)
+                )
 
                 result = await query_virustotal("192.168.1.1", "ip", ctx=mock_context)
 
@@ -247,15 +246,16 @@ class TestErrorHandling:
     @pytest.mark.anyio
     async def test_network_timeout(self, mock_context):
         """Test network timeout handling."""
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.virustotal_api_key = "test_key"
             mock_settings.user_agent = "test-agent"
             mock_settings.request_timeout = 10
             mock_settings.cache_ttl = 300
 
-            with patch('httpx.AsyncClient') as mock_client:
-                mock_client.return_value.__aenter__.return_value.get.side_effect = \
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.get.side_effect = (
                     httpx.TimeoutException("Request timeout")
+                )
 
                 result = await query_virustotal("192.168.1.1", "ip", ctx=mock_context)
 
@@ -279,7 +279,7 @@ class TestRetryMechanism:
                 raise httpx.ConnectError("Connection failed")
             return "success"
 
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.max_retries = 3
 
             result = await retry_api_call(failing_function, ctx=mock_context)
@@ -290,10 +290,11 @@ class TestRetryMechanism:
     @pytest.mark.anyio
     async def test_retry_exhausted(self, mock_context):
         """Test that retry mechanism eventually gives up."""
+
         async def always_failing_function():
             raise httpx.ConnectError("Always fails")
 
-        with patch('src.threatintel.threatintel.settings') as mock_settings:
+        with patch("src.threatintel.threatintel.settings") as mock_settings:
             mock_settings.max_retries = 2
 
             with pytest.raises(httpx.ConnectError):

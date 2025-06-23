@@ -28,8 +28,9 @@ console = Console()
 app = typer.Typer(
     name="threatintel",
     help="🛡️ FastMCP ThreatIntel - AI-Powered Threat Intelligence Analysis",
-    rich_markup_mode="rich"
+    rich_markup_mode="rich",
 )
+
 
 class MockContext:
     """Mock context for standalone CLI usage."""
@@ -56,6 +57,7 @@ class MockContext:
             console.print(f"[dim]🐛 {message}[/dim]")
         self.logger.debug(message)
 
+
 def display_banner(console_obj: Console = console):
     """Display the application banner."""
     banner = """
@@ -63,6 +65,7 @@ def display_banner(console_obj: Console = console):
     [dim]AI-Powered Threat Intelligence Analysis Tool[/dim]
     """
     console_obj.print(Panel(banner, expand=False))
+
 
 def check_api_configuration(console_obj: Console = console) -> bool:
     """Check if API keys are configured and warn if missing."""
@@ -77,17 +80,21 @@ def check_api_configuration(console_obj: Console = console) -> bool:
 
     if missing_keys:
         console_obj.print(f"[yellow]⚠️ Missing API keys: {', '.join(missing_keys)}[/yellow]")
-        console_obj.print("[dim]Some features may be limited. Configure API keys for full functionality.[/dim]")
+        console_obj.print(
+            "[dim]Some features may be limited. Configure API keys for full functionality.[/dim]"
+        )
         return len(missing_keys) < 3
 
     console_obj.print("[green]✅ All API keys configured[/green]")
     return True
+
 
 @app.command()
 def version():
     """Show version information."""
     console.print("[bold]FastMCP ThreatIntel v0.2.0[/bold]")
     console.print("Licensed under Apache-2.0")
+
 
 @app.command()
 def config():
@@ -102,9 +109,13 @@ def config():
     table.add_column("Status", style="green")
     table.add_column("Required", style="yellow")
 
-    table.add_row("VirusTotal", "✅ Configured" if settings.virustotal_api_key else "❌ Missing", "Yes")
+    table.add_row(
+        "VirusTotal", "✅ Configured" if settings.virustotal_api_key else "❌ Missing", "Yes"
+    )
     table.add_row("OTX", "✅ Configured" if settings.otx_api_key else "❌ Missing", "Yes")
-    table.add_row("AbuseIPDB", "✅ Configured" if settings.abuseipdb_api_key else "❌ Missing", "No")
+    table.add_row(
+        "AbuseIPDB", "✅ Configured" if settings.abuseipdb_api_key else "❌ Missing", "No"
+    )
     table.add_row("IPinfo", "✅ Configured" if settings.ipinfo_api_key else "❌ Missing", "No")
 
     console.print(table)
@@ -130,6 +141,7 @@ OTX_API_KEY=your_otx_api_key
 ABUSEIPDB_API_KEY=your_abuseipdb_api_key
 IPINFO_API_KEY=your_ipinfo_api_key[/dim]
     """)
+
 
 @app.command()
 def server(
@@ -210,7 +222,11 @@ def analyze(
                         table.add_row("Reports", "; ".join(result.reports[:3]))
 
                     if result.city or result.country:
-                        location = f"{result.city}, {result.country}" if result.city and result.country else result.country or result.city
+                        location = (
+                            f"{result.city}, {result.country}"
+                            if result.city and result.country
+                            else result.country or result.city
+                        )
                         table.add_row("Location", location)
 
                     console.print(table)
@@ -256,9 +272,7 @@ def analyze(
 def batch(
     input_file: str = typer.Argument(..., help="File containing IOCs (one per line)"),
     output_file: str | None = typer.Option(None, help="Output file for results"),
-    output_format: str = typer.Option(
-        "markdown", help="Output format: markdown, json, html"
-    ),
+    output_format: str = typer.Option("markdown", help="Output format: markdown, json, html"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Verbose output"),
 ):
     """Analyze IOCs from a file in batch mode."""
@@ -364,9 +378,7 @@ def interactive(
                     # Treat as IOC to analyze
                     ioc_type = await get_ioc_type(command, ctx)  # type: ignore
                     if ioc_type == "unknown":
-                        console.print(
-                            f"[red]❌ Could not determine IOC type for: {command}[/red]"
-                        )
+                        console.print(f"[red]❌ Could not determine IOC type for: {command}[/red]")
                         continue
 
                     with Progress(
@@ -386,9 +398,7 @@ def interactive(
                         table.add_row("IOC", result.value)
                         table.add_row("Type", result.type.upper())
                         table.add_row("Reputation", result.reputation or "Unknown")
-                        table.add_row(
-                            "Score", f"{result.score:.1f}" if result.score else "N/A"
-                        )
+                        table.add_row("Score", f"{result.score:.1f}" if result.score else "N/A")
 
                         console.print(table)
 
@@ -399,6 +409,7 @@ def interactive(
                 console.print(f"[red]❌ Error: {str(e)}[/red]")
 
     asyncio.run(_interactive())
+
 
 @app.command()
 def setup():
@@ -445,7 +456,7 @@ def setup():
 
     # Write .env file
     try:
-        with open(env_file, 'w') as f:
+        with open(env_file, "w") as f:
             f.write("# FastMCP ThreatIntel Configuration\n")
             f.write("# Generated by setup wizard\n\n")
 
@@ -463,6 +474,7 @@ def setup():
     except Exception as e:
         console.print(f"[red]❌ Error saving configuration: {str(e)}[/red]")
 
+
 def main():
     """Main entry point for the CLI."""
     try:
@@ -473,6 +485,7 @@ def main():
     except Exception as e:
         console.print(f"[red]❌ Unexpected error: {str(e)}[/red]")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

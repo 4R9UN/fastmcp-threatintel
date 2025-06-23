@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 logger = logging.getLogger("threatintel.settings")
 
+
 def find_and_load_dotenv():
     """Search for and load .env file from common locations."""
     # Start from the current directory and go up
@@ -29,28 +30,26 @@ def find_and_load_dotenv():
 
     logger.info("No .env file found in common locations.")
 
+
 # Load environment variables
 find_and_load_dotenv()
+
 
 class Settings(BaseModel):
     """Application settings including API keys and performance configurations."""
 
     # API Keys
     virustotal_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("VIRUSTOTAL_API_KEY"),
-        description="VirusTotal API Key"
+        default_factory=lambda: os.getenv("VIRUSTOTAL_API_KEY"), description="VirusTotal API Key"
     )
     otx_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("OTX_API_KEY"),
-        description="AlienVault OTX API Key"
+        default_factory=lambda: os.getenv("OTX_API_KEY"), description="AlienVault OTX API Key"
     )
     abuseipdb_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("ABUSEIPDB_API_KEY"),
-        description="AbuseIPDB API Key"
+        default_factory=lambda: os.getenv("ABUSEIPDB_API_KEY"), description="AbuseIPDB API Key"
     )
     ipinfo_api_key: str | None = Field(
-        default_factory=lambda: os.getenv("IPINFO_API_KEY"),
-        description="IPinfo API Key"
+        default_factory=lambda: os.getenv("IPINFO_API_KEY"), description="IPinfo API Key"
     )
 
     @field_validator(
@@ -74,8 +73,7 @@ class Settings(BaseModel):
 
     # Connection settings
     user_agent: str = Field(
-        default="FastMCP-ThreatIntel/1.0",
-        description="User agent used for API requests"
+        default="FastMCP-ThreatIntel/1.0", description="User agent used for API requests"
     )
 
     @field_validator("max_retries")
@@ -107,10 +105,12 @@ class Settings(BaseModel):
 
         return self
 
+
 @lru_cache
 def get_settings() -> Settings:
     """Get cached application settings."""
     return Settings()
+
 
 # Singleton instance
 settings = get_settings()

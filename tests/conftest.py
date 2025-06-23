@@ -12,12 +12,14 @@ import pytest
 os.environ["FASTMCP_TEST_MODE"] = "1"
 os.environ["FASTMCP_LOG_LEVEL"] = "DEBUG"
 
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     """Create an instance of the default event loop for the test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
+
 
 @pytest.fixture
 def mock_context():
@@ -29,6 +31,7 @@ def mock_context():
     context.debug = AsyncMock()
     return context
 
+
 @pytest.fixture
 def sample_ioc_data() -> dict[str, Any]:
     """Sample IOC data for testing."""
@@ -38,8 +41,9 @@ def sample_ioc_data() -> dict[str, Any]:
         "url": "https://example.com/malware",
         "md5": "d41d8cd98f00b204e9800998ecf8427e",
         "sha1": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
-        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     }
+
 
 @pytest.fixture
 def mock_api_responses():
@@ -52,15 +56,15 @@ def mock_api_responses():
                         "malicious": 5,
                         "suspicious": 2,
                         "clean": 60,
-                        "undetected": 3
+                        "undetected": 3,
                     },
                     "last_analysis_results": {
                         "Engine1": {"category": "malicious", "result": "Trojan.Test"},
-                        "Engine2": {"category": "clean", "result": "Clean"}
+                        "Engine2": {"category": "clean", "result": "Clean"},
                     },
                     "first_submission_date": 1640995200,
                     "last_analysis_date": 1640995200,
-                    "tags": ["malware", "trojan"]
+                    "tags": ["malware", "trojan"],
                 }
             }
         },
@@ -71,9 +75,9 @@ def mock_api_responses():
                     {
                         "name": "Test Malware Campaign",
                         "created": "2023-01-01T00:00:00.000Z",
-                        "tags": ["malware", "apt"]
+                        "tags": ["malware", "apt"],
                     }
-                ]
+                ],
             }
         },
         "abuseipdb": {
@@ -82,10 +86,11 @@ def mock_api_responses():
                 "totalReports": 10,
                 "lastReportedAt": "2023-01-01T00:00:00+00:00",
                 "usageType": "datacenter",
-                "isTor": False
+                "isTor": False,
             }
-        }
+        },
     }
+
 
 @pytest.fixture
 def test_config():
@@ -97,14 +102,16 @@ def test_config():
         "IPINFO_API_KEY": "test_ipinfo_key",
         "CACHE_TTL": "60",
         "MAX_RETRIES": "2",
-        "REQUEST_TIMEOUT": "5"
+        "REQUEST_TIMEOUT": "5",
     }
+
 
 @pytest.fixture(autouse=True)
 def setup_test_env(test_config, monkeypatch):
     """Set up test environment variables."""
     for key, value in test_config.items():
         monkeypatch.setenv(key, value)
+
 
 @pytest.fixture
 def temp_ioc_file(tmp_path):
