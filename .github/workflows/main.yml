@@ -83,6 +83,6 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            4r9un/fastmcp-threatintel:latest
-            4r9un/fastmcp-threatintel:${{ steps.version.outputs.VERSION }}
-            4r9un/fastmcp-threatintel:${{ github.ref_name }}
+            arjuntrivedi/4r9un:latest
+            arjuntrivedi/4r9un:${{ steps.version.outputs.VERSION }}
+            arjuntrivedi/4r9un:${{ github.ref_name }}
