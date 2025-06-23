@@ -5,7 +5,7 @@
 [![PyPI version](https://badge.fury.io/py/fastmcp-threatintel.svg)](https://badge.fury.io/py/fastmcp-threatintel)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/4r9un)](https://hub.docker.com/r/arjuntrivedi/4r9un)
+[![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/fastmcp-threatintel)](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
 
 > 🚀 **MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity**
 > *Built by **Arjun Trivedi (4R9UN)** - Enterprise-Grade Threat Intelligence Platform*
@@ -93,10 +93,10 @@ threatintel analyze 8.8.8.8 --output-format table --verbose
 ### 🐳 Docker (Production Ready)
 ```bash
 # Pull and run with your API keys
-docker pull arjuntrivedi/4r9un:fastmcp-threatintel-latest
+docker pull arjuntrivedi/fastmcp-threatintel:latest
 docker run -e VIRUSTOTAL_API_KEY=your_key \
            -e OTX_API_KEY=your_key \
-           arjuntrivedi/4r9un:fastmcp-threatintel-latest \
+           arjuntrivedi/fastmcp-threatintel:latest \
            analyze 192.168.1.1
 ```
 
@@ -301,7 +301,7 @@ This project is licensed under the **Apache License 2.0** - see the [LICENSE](LI
 
 **📚 [Documentation](https://4r9un.github.io/fastmcp-threatintel/) • 🐛 [Report Bug](https://github.com/4R9UN/fastmcp-threatintel/issues) • 💡 [Request Feature](https://github.com/4R9UN/fastmcp-threatintel/issues) • 💬 [Discussions](https://github.com/4R9UN/fastmcp-threatintel/discussions)**
 
-**📦 [PyPI Package](https://pypi.org/project/fastmcp-threatintel/) • 🐳 [Docker Hub](https://hub.docker.com/r/arjuntrivedi/4r9un)**
+**📦 [PyPI Package](https://pypi.org/project/fastmcp-threatintel/) • 🐳 [Docker Hub](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)**
 
 ---
 
