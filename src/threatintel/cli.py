@@ -27,7 +27,7 @@ from .tools import _analyze_iocs_impl, get_ioc_type, process_single_ioc
 console = Console()
 app = typer.Typer(
     name="threatintel",
-    help="🛡️ FastMCP ThreatIntel - AI-Powered Threat Intelligence Analysis",
+    help="🛡️ FastMCP ThreatIntel - MCP AI Powered Threat Intelligence, Revolutionizing Cybersecurity | Built by Arjun Trivedi (4R9UN)",
     rich_markup_mode="rich",
 )
 
@@ -62,7 +62,8 @@ def display_banner(console_obj: Console = console):
     """Display the application banner."""
     banner = """
     [bold blue]🛡️ FastMCP ThreatIntel[/bold blue]
-    [dim]AI-Powered Threat Intelligence Analysis Tool[/dim]
+    [dim]MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity[/dim]
+    [dim italic]Built by Arjun Trivedi (4R9UN)[/dim italic]
     """
     console_obj.print(Panel(banner, expand=False))
 
@@ -92,8 +93,12 @@ def check_api_configuration(console_obj: Console = console) -> bool:
 @app.command()
 def version():
     """Show version information."""
-    console.print("[bold]FastMCP ThreatIntel v0.2.0[/bold]")
-    console.print("Licensed under Apache-2.0")
+    console.print("[bold blue]🛡️ FastMCP ThreatIntel v0.2.5[/bold blue]")
+    console.print("[dim]MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity[/dim]")
+    console.print("[dim italic]Built by Arjun Trivedi (4R9UN) with ❤️ for the cybersecurity community[/dim italic]")
+    console.print("\n[bold]License:[/bold] Apache-2.0")
+    console.print("[bold]Repository:[/bold] https://github.com/4R9UN/fastmcp-threatintel")
+    console.print("[bold]Documentation:[/bold] https://4r9un.github.io/fastmcp-threatintel/")
 
 
 @app.command()

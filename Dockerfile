@@ -72,10 +72,17 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 CMD ["threatintel", "--help"]
 
 # Container metadata and labels
-LABEL org.opencontainers.image.title="FastMCP ThreatIntel"
-LABEL org.opencontainers.image.description="AI-Powered Threat Intelligence Analysis Tool"
+LABEL org.opencontainers.image.title="🛡️ FastMCP ThreatIntel - Enterprise Threat Intelligence Platform"
+LABEL org.opencontainers.image.description="🛡️ MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity | Built by Arjun Trivedi (4R9UN)"
 LABEL org.opencontainers.image.source="https://github.com/4R9UN/fastmcp-threatintel"
+LABEL org.opencontainers.image.url="https://github.com/4R9UN/fastmcp-threatintel"
+LABEL org.opencontainers.image.documentation="https://4r9un.github.io/fastmcp-threatintel/"
 LABEL org.opencontainers.image.licenses="Apache-2.0"
-LABEL org.opencontainers.image.author="Arjun Trivedi <arjuntrivedi42@yahoo.com>"
-LABEL org.opencontainers.image.vendor="Arjun Trivedi"
-LABEL maintainer="Arjun Trivedi <arjuntrivedi42@yahoo.com>"
+LABEL org.opencontainers.image.author="Arjun Trivedi (4R9UN) <arjuntrivedi42@yahoo.com>"
+LABEL org.opencontainers.image.vendor="Roo Engineering"
+LABEL org.opencontainers.image.version="0.2.5"
+LABEL maintainer="Arjun Trivedi (4R9UN) <arjuntrivedi42@yahoo.com>"
+LABEL org.opencontainers.image.created="2025-06-23"
+LABEL org.opencontainers.image.revision="main"
+LABEL org.label-schema.vcs-url="https://github.com/4R9UN/fastmcp-threatintel.git"
+LABEL org.label-schema.docker.cmd="docker run -e VIRUSTOTAL_API_KEY=your_key -e OTX_API_KEY=your_key arjuntrivedi/4r9un:fastmcp-threatintel-latest analyze 8.8.8.8"

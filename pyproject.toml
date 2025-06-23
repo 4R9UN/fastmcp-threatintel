@@ -4,30 +4,36 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fastmcp-threatintel"
-version = "0.2.4"
-description = "AI-Powered Threat Intelligence Analysis Tool with Multi-Source IOC Analysis, APT Attribution, and Interactive Reporting"
+version = "0.2.5"
+description = "🛡️ MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity | Built by Arjun Trivedi (4R9UN)"
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "Arjun Trivedi", email = "arjuntrivedi42@yahoo.com" },
+    { name = "Arjun Trivedi (4R9UN)", email = "arjuntrivedi42@yahoo.com" },
 ]
 maintainers = [
-    { name = "Arjun Trivedi", email = "arjuntrivedi42@yahoo.com" },
+    { name = "Arjun Trivedi (4R9UN)", email = "arjuntrivedi42@yahoo.com" },
+    { name = "Roo Engineering", email = "arjuntrivedi42@yahoo.com" },
 ]
 keywords = [
     "threat-intelligence",
     "cybersecurity",
-    "ioc",
-    "mcp",
-    "security",
-    "malware-analysis",
+    "ioc-analysis",
+    "mcp-server",
+    "ai-security",
     "apt-attribution",
+    "malware-analysis",
     "virustotal",
     "otx",
     "abuseipdb",
     "stix",
-    "threat-hunting"
+    "threat-hunting",
+    "security-automation",
+    "roo",
+    "4r9un",
+    "claude-desktop",
+    "model-context-protocol"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -72,7 +78,7 @@ dependencies = [
 ]
 
 [project.scripts]
-threatintel = "src.threatintel.cli:app"
+threatintel = "threatintel.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/4R9UN/fastmcp-threatintel"
