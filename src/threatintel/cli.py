@@ -95,7 +95,9 @@ def version():
     """Show version information."""
     console.print("[bold blue]🛡️ FastMCP ThreatIntel v0.2.6[/bold blue]")
     console.print("[dim]MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity[/dim]")
-    console.print("[dim italic]Built by Arjun Trivedi (4R9UN) with ❤️ for the cybersecurity community[/dim italic]")
+    console.print(
+        "[dim italic]Built by Arjun Trivedi (4R9UN) with ❤️ for the cybersecurity community[/dim italic]"
+    )
     console.print("\n[bold]License:[/bold] Apache-2.0")
     console.print("[bold]Repository:[/bold] https://github.com/4R9UN/fastmcp-threatintel")
     console.print("[bold]Documentation:[/bold] https://4r9un.github.io/fastmcp-threatintel/")
