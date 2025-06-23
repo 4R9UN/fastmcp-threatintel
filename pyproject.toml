@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "fastmcp-threatintel"
-version = "0.2.6"
+version = "0.2.7"
 description = "🛡️ MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity | Built by Arjun Trivedi (4R9UN)"
 readme = "README.md"
 requires-python = ">=3.10,<4.0"

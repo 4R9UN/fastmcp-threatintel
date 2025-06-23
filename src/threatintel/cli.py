@@ -93,7 +93,7 @@ def check_api_configuration(console_obj: Console = console) -> bool:
 @app.command()
 def version():
     """Show version information."""
-    console.print("[bold blue]🛡️ FastMCP ThreatIntel v0.2.6[/bold blue]")
+    console.print("[bold blue]🛡️ FastMCP ThreatIntel v0.2.7[/bold blue]")
     console.print("[dim]MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity[/dim]")
     console.print(
         "[dim italic]Built by Arjun Trivedi (4R9UN) with ❤️ for the cybersecurity community[/dim italic]"
