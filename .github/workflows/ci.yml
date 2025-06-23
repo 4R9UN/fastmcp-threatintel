@@ -114,7 +114,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: arjuntrivedi
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          password: ${{ secrets.DOCKERHUB_TOKEN || secrets.DOCKER_TOKEN }}
 
       - name: Extract metadata
         id: meta
