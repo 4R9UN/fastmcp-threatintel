@@ -46,6 +46,34 @@ A comprehensive **Model Context Protocol (MCP)** server that provides enterprise
 - **🐳 Docker Container**: Production-ready containerization
 - **📦 Python Package**: Embed in your applications and workflows
 
+
+## 🏗️ Architecture
+
+```mermaid
+graph TB
+    A[AI Assistant] --> B[MCP Protocol]
+    C[CLI Interface] --> D[Core Engine]
+    B --> D
+    
+    D --> E[IOC Processor]
+    D --> F[Attribution Engine]
+    D --> G[Report Generator]
+    
+    E --> H[VirusTotal API]
+    E --> I[OTX API]
+    E --> J[AbuseIPDB API]
+    E --> K[IPinfo API]
+    
+    F --> L[APT Patterns]
+    F --> M[MITRE ATT&CK]
+    
+    G --> N[HTML Reports]
+    G --> O[JSON Export]
+    G --> P[STIX Output]
+```
+
+
+
 ## 🚀 Quick Start
 
 Choose your preferred installation method and get started in minutes:
@@ -193,32 +221,6 @@ threatintel server --host 0.0.0.0 --port 8000
 "Perform comprehensive threat analysis on 185.220.101.1 with APT attribution"
 "Generate a security incident report for these IOCs: [list]"
 ```
-
-## 🏗️ Architecture
-
-```mermaid
-graph TB
-    A[AI Assistant] --> B[MCP Protocol]
-    C[CLI Interface] --> D[Core Engine]
-    B --> D
-    
-    D --> E[IOC Processor]
-    D --> F[Attribution Engine]
-    D --> G[Report Generator]
-    
-    E --> H[VirusTotal API]
-    E --> I[OTX API]
-    E --> J[AbuseIPDB API]
-    E --> K[IPinfo API]
-    
-    F --> L[APT Patterns]
-    F --> M[MITRE ATT&CK]
-    
-    G --> N[HTML Reports]
-    G --> O[JSON Export]
-    G --> P[STIX Output]
-```
-
 ## 📚 Documentation
 
 ### 📖 **User Guides**
@@ -233,7 +235,7 @@ graph TB
 
 ## 🌟 What Makes It Special
 
-### **🔥 Built by Arjun Trivedi (4R9UN)**
+### **🔥 MCP Functionality **
 - **MCP AI Powered**: Cutting-edge threat intelligence automation
 - **Revolutionizing Cybersecurity**: Enterprise-grade AI-powered platform
 - **Community-Focused**: Open source with professional quality
