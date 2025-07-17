@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/4r9un-fastmcp-threatintel-badge.png)](https://mseep.ai/app/4r9un-fastmcp-threatintel)
+
 # 🛡️ FastMCP ThreatIntel - AI-Powered Threat Intelligence
 
 [![CI/CD Pipeline](https://github.com/4R9UN/fastmcp-threatintel/actions/workflows/ci.yml/badge.svg)](https://github.com/4R9UN/fastmcp-threatintel/actions/workflows/ci.yml)
