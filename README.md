@@ -8,6 +8,7 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Docker Pulls](https://img.shields.io/docker/pulls/arjuntrivedi/fastmcp-threatintel)](https://hub.docker.com/r/arjuntrivedi/fastmcp-threatintel)
+[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/09be09c3-bda9-4cb9-82d3-329459fecbc7)
 
 > 🚀 **MCP AI Powered Threat Intelligence - Revolutionizing Cybersecurity**
 > *Built by **Arjun Trivedi (4R9UN)** - Enterprise-Grade Threat Intelligence Platform*
